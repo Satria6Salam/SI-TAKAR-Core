@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Profil UMKM | SI-TAKAR</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="/static/js/app.js" defer></script>
+  </head>
+  <body>
+    <header class="public-nav">
+      <a class="brand" href="/"
+        ><span class="brand-mark">▦</span
+        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
+      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+        ☰
+      </button>
+      <nav class="nav-links" data-nav>
+        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
+        ><a href="/status">Status</a>
+      </nav>
+      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+    </header>
+    <main class="profile-shell">
+      <div class="page-intro">
+        <span class="kicker">AREA PENYEWA</span>
+        <h1>Profil UMKM dan aktivitas penyewa</h1>
+        <p>Ringkasan profil usaha, status kios, dan riwayat aktivitas.</p>
+      </div>
+      <section class="business-banner card">
+        <div class="business-avatar">▦</div>
+        <div class="business-name">
+          <h2 id="profile-business">Kriya Sari Nusantara</h2>
+          <p id="profile-owner">Pemilik: Siti Aminah · Nomor kios: A-07</p>
+        </div>
+        <span class="pill pill-green"><i></i> Aktif</span>
+      </section>
+      <div class="profile-grid">
+        <div class="profile-main">
+          <section class="card info-panel">
+            <h2>Data usaha</h2>
+            <div class="detail-grid">
+              <div>
+                <small>Kategori usaha</small
+                ><b id="profile-category">Kriya / kerajinan</b>
+              </div>
+              <div>
+                <small>Produk utama</small><b>Kerajinan tangan lokal</b>
+              </div>
+              <div><small>Asal usaha</small><b>Kota setempat</b></div>
+              <div><small>Tahun berdiri</small><b>2021</b></div>
+              <div class="wide">
+                <small>Deskripsi usaha</small
+                ><b
+                  >Produk kerajinan yang dibuat secara lokal dengan bahan
+                  pilihan.</b
+                >
+              </div>
+            </div>
+          </section>
+          <section class="card info-panel">
+            <h2>Pemilik &amp; kontak</h2>
+            <div class="detail-grid">
+              <div>
+                <small>Nama pemilik</small
+                ><b id="profile-owner-detail">Siti Aminah</b>
+              </div>
+              <div>
+                <small>Nomor telepon</small
+                ><b id="profile-phone">Belum diisi</b>
+              </div>
+              <div>
+                <small>Email</small><b id="profile-email">Belum diisi</b>
+              </div>
+              <div><small>Jam operasional</small><b>09.00–17.00</b></div>
+            </div>
+            <div class="info-box">
+              ✓ Pastikan nomor kontak selalu aktif agar pengelola dapat
+              menghubungi Anda.
+            </div>
+          </section>
+          <section class="card info-panel">
+            <h2>Catatan aktivitas terbaru</h2>
+            <div class="activity-row">
+              <time>01 Okt 2026</time><span>Data profil diperiksa</span
+              ><span class="pill pill-green">Selesai</span>
+            </div>
+            <div class="activity-row">
+              <time>28 Sep 2026</time><span>Konfirmasi data usaha</span
+              ><span class="pill pill-green">Selesai</span>
+            </div>
+            <div class="activity-row">
+              <time>25 Sep 2026</time><span>Pendaftaran diterima</span
+              ><span class="pill pill-blue">Tercatat</span>
+            </div>
+          </section>
+        </div>
+        <aside class="side-stack">
+          <section class="side-card">
+            <h2>Status aktivitas usaha</h2>
+            <span class="pill pill-green"><i></i> Kios aktif</span>
+            <div class="stall-box">
+              <small>Nomor kios</small><strong>A-07</strong
+              ><small>Zona A · 2 × 2 meter</small>
+            </div>
+            <p class="muted">Aktivitas terakhir: hari ini</p>
+            <button class="btn btn-green full-width" id="activity-button">
+              ✓ Buka kios hari ini
+            </button>
+            <p id="activity-message" class="form-note" role="status"></p>
+          </section>
+          <section class="side-card">
+            <h2>Aturan tidak aktif 14 hari</h2>
+            <p class="muted">
+              Sistem dapat memberi peringatan jika tidak ada aktivitas selama
+              beberapa hari.
+            </p>
+            <div class="rule-meter"><span></span></div>
+            <p class="small muted">
+              Peringatan ditampilkan setelah 7 hari tidak aktif. Kebijakan final
+              mengikuti aturan pengelola.
+            </p>
+          </section>
+        </aside>
+      </div>
+    </main>
+    <footer class="site-footer">
+      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+    </footer>
+  </body>
+</html>

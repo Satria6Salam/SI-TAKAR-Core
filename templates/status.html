@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Status Pendaftaran | SI-TAKAR</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="/static/js/app.js" defer></script>
+  </head>
+  <body>
+    <header class="public-nav">
+      <a class="brand" href="/"
+        ><span class="brand-mark">▦</span
+        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
+      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+        ☰
+      </button>
+      <nav class="nav-links" data-nav>
+        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
+        ><a class="active" href="/status">Status</a>
+      </nav>
+      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+    </header>
+    <main class="status-shell">
+      <div class="page-intro">
+        <span class="kicker">STATUS PENGAJUAN</span>
+        <h1>Periksa status pendaftaran</h1>
+        <p>
+          Informasi pada halaman ini disimpan secara lokal di browser untuk
+          demonstrasi frontend.
+        </p>
+      </div>
+      <section class="status-search card">
+        <form id="status-search-form">
+          <label for="status-code">Nomor pendaftaran</label>
+          <div class="search-row">
+            <input
+              id="status-code"
+              placeholder="Contoh: STK-2026-0001"
+            /><button class="btn btn-green" type="submit">
+              Periksa status
+            </button>
+          </div>
+        </form>
+      </section>
+      <section id="status-result" class="status-result card" aria-live="polite">
+        <div class="empty-state">
+          <span class="empty-icon">⌕</span>
+          <h2>Belum ada pengajuan yang dipilih</h2>
+          <p>Masukkan nomor pendaftaran atau kirim formulir terlebih dahulu.</p>
+          <a class="btn btn-outline" href="/pendaftaran">Daftar UMKM</a>
+        </div>
+      </section>
+      <section class="timeline-card card">
+        <h2>Bagaimana prosesnya?</h2>
+        <div class="timeline">
+          <div class="timeline-item done">
+            <span>✓</span>
+            <div>
+              <b>Pendaftaran diterima</b><small>Data awal tersimpan</small>
+            </div>
+          </div>
+          <div class="timeline-item current">
+            <span>2</span>
+            <div>
+              <b>Verifikasi data</b
+              ><small
+                >Pengelola memeriksa informasi dan kriteria prioritas</small
+              >
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span>3</span>
+            <div>
+              <b>Penempatan antrean</b
+              ><small>Pendaftar dimasukkan ke antrean yang sesuai</small>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span>4</span>
+            <div>
+              <b>Informasi alokasi kios</b
+              ><small>Pendaftar menerima informasi jika tersedia alokasi</small>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+    </footer>
+  </body>
+</html>
