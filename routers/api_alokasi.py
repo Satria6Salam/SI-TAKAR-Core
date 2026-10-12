@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from algoritma.deadlock_cron import jalankan_semua
 from database.config import get_db, utcnow
-from database.models import (AlokasiSewa, StatusAlokasi, StatusLapak,
+from database.models import (AlokasiSewa, ArsipPelanggaran, StatusAlokasi, StatusLapak,
                              StatusPendaftaran)
 from routers.helpers import alokasi_to_out
-# Menggunakan tipe data standar atau mengabaikan response_model ketat sementara jika schemas belum lengkap
+from schemas import AlokasiOut, LogDeadlockOut
 
 router = APIRouter(prefix="/alokasi", tags=["Alokasi & Deadlock"])
 
@@ -17,7 +18,7 @@ def _get_alokasi(db: Session, alokasi_id: int) -> AlokasiSewa:
     return a
 
 
-@router.post("/{alokasi_id}/konfirmasi")
+@router.post("/{alokasi_id}/konfirmasi", response_model=AlokasiOut)
 def konfirmasi_lapak(alokasi_id: int, db: Session = Depends(get_db)):
     """UMKM menyetujui lapak -> timer Timeout berhenti, lapak jadi Terisi."""
     a = _get_alokasi(db, alokasi_id)
@@ -35,7 +36,7 @@ def konfirmasi_lapak(alokasi_id: int, db: Session = Depends(get_db)):
     return alokasi_to_out(a, now)
 
 
-@router.post("/{alokasi_id}/absen")
+@router.post("/{alokasi_id}/absen", response_model=AlokasiOut)
 def buka_kios_hari_ini(alokasi_id: int, db: Session = Depends(get_db)):
     """Tombol 'Buka Kios Hari Ini' -> reset hitungan tidak aktif (cegah Preemption)."""
     a = _get_alokasi(db, alokasi_id)
@@ -47,7 +48,7 @@ def buka_kios_hari_ini(alokasi_id: int, db: Session = Depends(get_db)):
     return alokasi_to_out(a, now)
 
 
-@router.get("/umkm/{umkm_id}")
+@router.get("/umkm/{umkm_id}", response_model=AlokasiOut)
 def alokasi_milik_umkm(umkm_id: int, db: Session = Depends(get_db)):
     """Alokasi terkini milik UMKM (untuk Halaman Konfirmasi & Panel Lapak Aktif)."""
     a = (db.query(AlokasiSewa)
@@ -57,3 +58,19 @@ def alokasi_milik_umkm(umkm_id: int, db: Session = Depends(get_db)):
     if a is None:
         raise HTTPException(404, "UMKM ini tidak punya alokasi yang berjalan")
     return alokasi_to_out(a)
+
+
+@router.get("/log", response_model=list[LogDeadlockOut])
+def log_deadlock(db: Session = Depends(get_db)):
+    """Monitor Log Deadlock (admin): riwayat Timeout & Preemption, terbaru dulu."""
+    rows = db.query(ArsipPelanggaran).order_by(ArsipPelanggaran.id.desc()).all()
+    return [LogDeadlockOut(
+        id=r.id, umkm_id=r.umkm_id, nama_usaha=r.umkm.nama_usaha,
+        jenis_pelanggaran=r.jenis_pelanggaran, waktu_kejadian=r.waktu_kejadian,
+        keterangan=r.keterangan) for r in rows]
+
+
+@router.post("/jalankan-deadlock")
+def jalankan_deadlock_manual(db: Session = Depends(get_db)):
+    """Picu satu siklus cek Timeout + Preemption secara manual (untuk demo/admin)."""
+    return jalankan_semua(db)

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database.config import get_db
 from database.models import AlokasiSewa, Lapak, StatusAlokasi, StatusLapak
+from schemas import LapakCreate
 
 router = APIRouter(prefix="/peta", tags=["Peta Denah Pasar"])
 
@@ -28,34 +29,20 @@ def peta_lapak(db: Session = Depends(get_db)):
     } for l in lapak_list]
     ringkasan = {
         "kosong": sum(1 for i in items if i["status"] == StatusLapak.KOSONG),
-        "dipesan": sum(1 for i in items if i["status"] == StatusLapak.DIPESAN) if 'StatusLapur' in globals() else sum(1 for i in items if i["status"] == StatusLapak.DIPESAN),
+        "dipesan": sum(1 for i in items if i["status"] == StatusLapak.DIPESAN),
         "terisi": sum(1 for i in items if i["status"] == StatusLapak.TERISI),
     }
     return {"ringkasan": ringkasan, "lapak": items}
 
 
 @router.post("/lapak", status_code=201)
-def tambah_lapak(data: dict, db: Session = Depends(get_db)):
+def tambah_lapak(data: LapakCreate, db: Session = Depends(get_db)):
     """Admin menambah lapak baru ke denah (luas dihitung otomatis: panjang x lebar)."""
-    kode_lapak = data.get("kode_lapak")
-    panjang = data.get("panjang", 0.0)
-    lebar = data.get("lebar", 0.0)
-    posisi_x = data.get("posisi_x", 0)
-    posisi_y = data.get("posisi_y", 0)
-
-    if db.query(Lapak).filter(Lapak.kode_lapak == kode_lapak).first():
+    if db.query(Lapak).filter(Lapak.kode_lapak == data.kode_lapak).first():
         raise HTTPException(409, "kode_lapak sudah dipakai")
-    
-    l = Lapak(
-        kode_lapak=kode_lapak, 
-        panjang=panjang, 
-        lebar=lebar,
-        luas=round(panjang * lebar, 2),
-        posisi_x=posisi_x, 
-        posisi_y=posisi_y, 
-        status_lapak=StatusLapak.KOSONG
-    )
+    l = Lapak(kode_lapak=data.kode_lapak, panjang=data.panjang, lebar=data.lebar,
+              luas=round(data.panjang * data.lebar, 2),
+              posisi_x=data.posisi_x, posisi_y=data.posisi_y, status_lapak=StatusLapak.KOSONG)
     db.add(l)
     db.commit()
-    db.refresh(l)
     return {"id": l.id, "kode_lapak": l.kode_lapak, "luas": l.luas, "status": l.status_lapak}
