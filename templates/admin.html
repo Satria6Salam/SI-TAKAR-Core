@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Admin | SI-TAKAR</title>
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <script src="../static/js/app.js" defer></script>
+  </head>
+  <body class="form-page">
+    <header class="public-nav">
+      <a class="brand" href="./index.html" aria-label="SI-TAKAR Beranda">
+        <span class="brand-mark">▦</span>
+        <span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span>
+      </a>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+        ☰
+      </button>
+      <nav class="nav-links" data-nav>
+        <a href="./index.html">Beranda</a>
+        <a href="./pendaftaran.html">Pendaftaran</a>
+        <a href="./status.html">Status</a>
+        <a class="active" href="./admin.html">Admin</a>
+      </nav>
+      <a class="help-link" href="./index.html#bantuan"
+        >ⓘ <span>Bantuan</span></a
+      >
+    </header>
+    <main class="admin-shell">
+      <section class="admin-login" id="admin-login-panel">
+        <div class="admin-login-copy">
+          <span class="kicker">AREA PENGELOLA</span>
+          <h1>Dashboard admin</h1>
+          <p>
+            Masuk untuk memantau pendaftar, antrean prioritas, dan ketersediaan
+            kios.
+          </p>
+        </div>
+        <form id="admin-login-form" class="admin-login-form">
+          <label
+            >Username<input name="username" autocomplete="username" required
+          /></label>
+          <label
+            >Password<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+          /></label>
+          <button class="btn btn-green" type="submit">
+            Masuk ke dashboard
+          </button>
+          <p class="demo-credentials">
+            Akun demo: <b>admin</b> · Password: <b>admin123</b>
+          </p>
+          <button class="demo-fill" id="demo-fill" type="button">
+            Isi akun demo
+          </button>
+        </form>
+      </section>
+      <section id="admin-dashboard" class="admin-dashboard" hidden>
+        <div class="dashboard-heading">
+          <div>
+            <span class="kicker">RINGKASAN PENGELOLA</span>
+            <h1>Dashboard admin</h1>
+            <p>Masuk sebagai <b id="admin-username"></b></p>
+          </div>
+          <div class="dashboard-actions">
+            <button class="btn btn-light" id="dashboard-refresh" type="button">
+              Muat ulang
+            </button>
+            <button class="btn btn-green" id="admin-logout" type="button">
+              Keluar
+            </button>
+          </div>
+        </div>
+        <div class="dashboard-metrics" aria-live="polite">
+          <article class="dashboard-metric">
+            <span>Pendaftar mengantre</span
+            ><strong id="metric-applicants">0</strong>
+          </article>
+          <article class="dashboard-metric">
+            <span>Kios kosong</span><strong id="metric-empty-stalls">0</strong>
+          </article>
+          <article class="dashboard-metric">
+            <span>Kios dipesan</span
+            ><strong id="metric-booked-stalls">0</strong>
+          </article>
+          <article class="dashboard-metric">
+            <span>Kios terisi</span
+            ><strong id="metric-occupied-stalls">0</strong>
+          </article>
+        </div>
+        <section class="dashboard-analytics">
+          <div class="dashboard-chart">
+            <div class="dashboard-section-heading">
+              <div>
+                <span class="kicker">PENDAFTAR</span>
+                <h2>Komposisi antrean</h2>
+              </div>
+            </div>
+            <div
+              id="queue-chart"
+              class="chart-bars"
+              role="img"
+              aria-label="Grafik komposisi antrean"
+            ></div>
+          </div>
+          <div class="dashboard-chart">
+            <div class="dashboard-section-heading">
+              <div>
+                <span class="kicker">KAPASITAS PASAR</span>
+                <h2>Status kios</h2>
+              </div>
+            </div>
+            <div
+              id="stall-chart"
+              class="chart-bars"
+              role="img"
+              aria-label="Grafik status kios"
+            ></div>
+          </div>
+        </section>
+        <section class="dashboard-review">
+          <div class="dashboard-section-heading">
+            <div>
+              <span class="kicker">TINDAK LANJUT</span>
+              <h2>Verifikasi pendaftar</h2>
+            </div>
+            <span class="muted small"
+              >Nama admin tercatat otomatis saat memberi keputusan.</span
+            >
+          </div>
+          <div id="applicant-review-list" class="review-list"></div>
+        </section>
+        <section class="dashboard-queue">
+          <div class="dashboard-section-heading">
+            <div>
+              <span class="kicker">MULTI-LEVEL QUEUE</span>
+              <h2>Antrean pendaftar</h2>
+            </div>
+            <span id="dashboard-updated" class="muted small"></span>
+          </div>
+          <div class="queue-columns">
+            <section class="queue-column">
+              <h3>Queue 1 <span>Prioritas tinggi</span></h3>
+              <div id="queue-1" class="queue-list"></div>
+            </section>
+            <section class="queue-column">
+              <h3>Queue 2 <span>Prioritas menengah</span></h3>
+              <div id="queue-2" class="queue-list"></div>
+            </section>
+            <section class="queue-column">
+              <h3>Queue 3 <span>Reguler</span></h3>
+              <div id="queue-3" class="queue-list"></div>
+            </section>
+          </div>
+        </section>
+      </section>
+      <p
+        id="admin-message"
+        class="inline-message"
+        role="status"
+        aria-live="polite"
+      ></p>
+      <p class="admin-footnote" id="admin-footnote">
+        Mode demo memakai akun awal dari seed: admin / admin123. Jalankan
+        <code>python seed.py</code> bila akun demo belum tersedia.
+      </p>
+    </main>
+    <footer class="site-footer">
+      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+    </footer>
+  </body>
+</html>

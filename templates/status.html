@@ -4,30 +4,34 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Status Pendaftaran | SI-TAKAR</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-    <script src="/static/js/app.js" defer></script>
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <script src="../static/js/app.js" defer></script>
   </head>
   <body>
     <header class="public-nav">
-      <a class="brand" href="/"
+      <a class="brand" href="./index.html"
         ><span class="brand-mark">▦</span
         ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
       ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
         ☰
       </button>
       <nav class="nav-links" data-nav>
-        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
-        ><a class="active" href="/status">Status</a>
+        <a href="./index.html">Beranda</a
+        ><a href="./pendaftaran.html">Pendaftaran</a
+        ><a class="active" href="./status.html">Status</a
+        ><a href="./admin.html">Admin</a>
       </nav>
-      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+      <a class="help-link" href="./index.html#bantuan"
+        >ⓘ <span>Bantuan</span></a
+      >
     </header>
     <main class="status-shell">
       <div class="page-intro">
         <span class="kicker">STATUS PENGAJUAN</span>
         <h1>Periksa status pendaftaran</h1>
         <p>
-          Informasi pada halaman ini disimpan secara lokal di browser untuk
-          demonstrasi frontend.
+          Status verifikasi dan nama petugas ditampilkan setelah pengelola
+          memeriksa pengajuan.
         </p>
       </div>
       <section class="status-search card">
@@ -48,7 +52,7 @@
           <span class="empty-icon">⌕</span>
           <h2>Belum ada pengajuan yang dipilih</h2>
           <p>Masukkan nomor pendaftaran atau kirim formulir terlebih dahulu.</p>
-          <a class="btn btn-outline" href="/pendaftaran">Daftar UMKM</a>
+          <a class="btn btn-outline" href="./pendaftaran.html">Daftar UMKM</a>
         </div>
       </section>
       <section class="timeline-card card">

@@ -4,12 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pendaftaran UMKM | SI-TAKAR</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-    <script src="/static/js/app.js" defer></script>
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <script src="../static/js/app.js" defer></script>
   </head>
   <body class="form-page">
     <header class="public-nav">
-      <a class="brand" href="/"
+      <a class="brand" href="./index.html"
         ><span class="brand-mark">▦</span
         ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
       >
@@ -17,11 +17,13 @@
         ☰
       </button>
       <nav class="nav-links" data-nav>
-        <a href="/">Beranda</a
-        ><a class="active" href="/pendaftaran">Pendaftaran</a
-        ><a href="/status">Status</a>
+        <a href="./index.html">Beranda</a
+        ><a class="active" href="./pendaftaran.html">Pendaftaran</a
+        ><a href="./status.html">Status</a><a href="./admin.html">Admin</a>
       </nav>
-      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+      <a class="help-link" href="./index.html #bantuan"
+        >ⓘ <span>Bantuan</span></a
+      >
     </header>
     <main class="form-shell">
       <div class="page-intro">
@@ -70,6 +72,14 @@
                   type="tel"
                   placeholder="Contoh: 08xxxxxxxxxx"
                   autocomplete="tel"
+              /></label>
+              <label
+                >Domisili sesuai KTP <span class="required">*</span
+                ><input
+                  name="domicile"
+                  required
+                  placeholder="Contoh: Kota Contoh"
+                  autocomplete="address-level2"
               /></label>
               <label
                 >Email (opsional)<input
@@ -196,7 +206,7 @@
             </p>
           </div>
           <div class="form-actions">
-            <a class="btn btn-light" href="/">Kembali</a
+            <a class="btn btn-light" href="./index.html">Kembali</a
             ><button class="btn btn-green" type="submit">
               Daftarkan UMKM sekarang →
             </button>
@@ -255,7 +265,7 @@
               Siapkan identitas pemilik, nomor yang aktif, deskripsi produk, dan
               dokumen pendukung jika tersedia.
             </p>
-            <a class="text-link" href="/status"
+            <a class="text-link" href="./status.html"
               >Sudah mendaftar? Cek status →</a
             >
           </section>

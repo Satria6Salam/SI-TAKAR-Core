@@ -31,6 +31,8 @@ class Admin(Base):
     username = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
 
+    verifikasi = relationship("VerifikasiPendaftaran", back_populates="admin")
+
 
 class UMKM(Base):
     __tablename__ = "umkm"
@@ -47,6 +49,20 @@ class UMKM(Base):
 
     alokasi = relationship("AlokasiSewa", back_populates="umkm")
     arsip = relationship("ArsipPelanggaran", back_populates="umkm")
+    verifikasi = relationship("VerifikasiPendaftaran", back_populates="umkm", uselist=False)
+
+
+class VerifikasiPendaftaran(Base):
+    __tablename__ = "verifikasi_pendaftaran"
+    id = Column(Integer, primary_key=True, index=True)
+    umkm_id = Column(Integer, ForeignKey("umkm.id"), unique=True, nullable=False)
+    admin_id = Column(Integer, ForeignKey("admin.id"), nullable=False)
+    status = Column(String, nullable=False)
+    catatan = Column(Text)
+    waktu_verifikasi = Column(DateTime, default=utcnow, nullable=False)
+
+    umkm = relationship("UMKM", back_populates="verifikasi")
+    admin = relationship("Admin", back_populates="verifikasi")
 
 
 class Lapak(Base):
