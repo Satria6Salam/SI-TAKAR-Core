@@ -2,15 +2,21 @@ import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from algoritma.deadlock_cron import jalankan_semua
 from database import models  # penting: supaya semua model ke-load sebelum create_all
 from database.config import CRON_INTERVAL_DETIK, SessionLocal, Base, engine
 from routers import api_alokasi, api_pendaftaran, api_peta
+
+# Konfigurasi Direktori Frontend & Templates
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = BASE_DIR / "templates"
 
 log = logging.getLogger("si_takar")
 
@@ -50,14 +56,47 @@ app = FastAPI(title="SI-TAKAR App", version="0.2.0", lifespan=lifespan)
 # Izinkan frontend/desainer memanggil API dari origin lain saat development
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+# Pendaftaran Endpoint Router Backend
 app.include_router(api_pendaftaran.router)
 app.include_router(api_alokasi.router)
 app.include_router(api_peta.router)
 
-if os.path.isdir("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+# Menghubungkan folder static (CSS, JS, Images)
+if (BASE_DIR / "static").is_dir():
+    app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 
-@app.get("/", tags=["Root"])
-def root():
+def serve_page(filename: str) -> FileResponse:
+    return FileResponse(TEMPLATES_DIR / filename)
+
+
+# --- Rute Penyajian Halaman Frontend (HTML Slicing) ---
+
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+def home_page():
+    return serve_page("index.html")
+
+
+@app.get("/pendaftaran", include_in_schema=False)
+@app.get("/pendaftaran.html", include_in_schema=False)
+def registration_page():
+    return serve_page("pendaftaran.html")
+
+
+@app.get("/status", include_in_schema=False)
+@app.get("/status.html", include_in_schema=False)
+def status_page():
+    return serve_page("status.html")
+
+
+@app.get("/profil", include_in_schema=False)
+@app.get("/profil.html", include_in_schema=False)
+def profile_page():
+    return serve_page("profil.html")
+
+
+# Cek Status API (Root Endpoint untuk Backend)
+@app.get("/api-status", tags=["Root"])
+def api_status():
     return {"message": "SI-TAKAR API is running", "docs": "/docs"}

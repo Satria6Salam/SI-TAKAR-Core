@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pendaftaran UMKM | SI-TAKAR</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="/static/js/app.js" defer></script>
+  </head>
+  <body class="form-page">
+    <header class="public-nav">
+      <a class="brand" href="/"
+        ><span class="brand-mark">▦</span
+        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
+      >
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+        ☰
+      </button>
+      <nav class="nav-links" data-nav>
+        <a href="/">Beranda</a
+        ><a class="active" href="/pendaftaran">Pendaftaran</a
+        ><a href="/status">Status</a>
+      </nav>
+      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+    </header>
+    <main class="form-shell">
+      <div class="page-intro">
+        <span class="kicker">PENDAFTARAN UMKM</span>
+        <h1>Daftarkan usaha Anda</h1>
+        <p>
+          Lengkapi informasi berikut agar pengelola dapat memproses permohonan
+          kios dengan tepat.
+        </p>
+      </div>
+      <div class="form-layout">
+        <form id="registration-form" class="form-card">
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="step-number">1</span>
+              <div>
+                <h2>Informasi identitas pemilik</h2>
+                <p>Informasi pemilik yang bertanggung jawab atas usaha.</p>
+              </div>
+            </div>
+            <div class="field-grid">
+              <label
+                >Nama lengkap pemilik <span class="required">*</span
+                ><input
+                  name="owner"
+                  required
+                  placeholder="Contoh: Siti Aminah"
+                  autocomplete="name"
+              /></label>
+              <label
+                >NIK / nomor KTP <span class="required">*</span
+                ><input
+                  name="nik"
+                  required
+                  inputmode="numeric"
+                  minlength="16"
+                  maxlength="16"
+                  pattern="[0-9]{16}"
+                  placeholder="16 digit NIK"
+              /></label>
+              <label
+                >Nomor WhatsApp / telepon <span class="required">*</span
+                ><input
+                  name="phone"
+                  required
+                  type="tel"
+                  placeholder="Contoh: 08xxxxxxxxxx"
+                  autocomplete="tel"
+              /></label>
+              <label
+                >Email (opsional)<input
+                  name="email"
+                  type="email"
+                  placeholder="nama@email.com"
+              /></label>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="step-number">2</span>
+              <div>
+                <h2>Informasi usaha</h2>
+                <p>Jelaskan usaha dan produk yang akan dijual di pasar.</p>
+              </div>
+            </div>
+            <div class="field-grid">
+              <label
+                >Nama usaha / toko <span class="required">*</span
+                ><input
+                  name="business"
+                  required
+                  placeholder="Nama toko atau merek"
+              /></label>
+              <label
+                >Kategori produk <span class="required">*</span
+                ><select name="category" required>
+                  <option value="">Pilih kategori</option>
+                  <option>Kriya / kerajinan</option>
+                  <option>Kuliner</option>
+                  <option>Fashion / tekstil</option>
+                  <option>Seni dan antik</option>
+                  <option>Jasa kreatif</option>
+                  <option>Lainnya</option>
+                </select></label
+              >
+              <label class="full-field"
+                >Deskripsi singkat produk <span class="required">*</span
+                ><textarea
+                  name="description"
+                  required
+                  rows="3"
+                  placeholder="Ceritakan produk utama dan ciri khas usaha Anda"
+                ></textarea>
+              </label>
+              <label
+                >Kebutuhan ukuran kios <span class="required">*</span
+                ><select name="stallSize" required>
+                  <option value="">Pilih ukuran</option>
+                  <option>2 × 2 meter</option>
+                  <option>2 × 3 meter</option>
+                  <option>3 × 3 meter</option>
+                </select></label
+              >
+              <label
+                >Kebutuhan listrik<select name="electricity">
+                  <option>Tidak membutuhkan</option>
+                  <option>Ya, kebutuhan ringan</option>
+                  <option>Ya, kebutuhan sedang</option>
+                </select></label
+              >
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="step-number">3</span>
+              <div>
+                <h2>Pilihan prioritas dan dokumen</h2>
+                <p>
+                  Pilih kondisi yang sesuai. Penetapan antrean akhir mengikuti
+                  verifikasi pengelola.
+                </p>
+              </div>
+            </div>
+            <fieldset class="priority-options">
+              <legend>
+                Pilihan kategori prioritas <span class="required">*</span>
+              </legend>
+              <label class="priority-option"
+                ><input type="radio" name="priority" value="1" required /><span
+                  ><b>Prioritas tinggi</b
+                  ><small
+                    >Perajin lokal, UMKM rentan, atau pelaku usaha penyandang
+                    disabilitas.</small
+                  ></span
+                ></label
+              >
+              <label class="priority-option"
+                ><input type="radio" name="priority" value="2" /><span
+                  ><b>Prioritas menengah</b
+                  ><small
+                    >UMKM lokal bidang kuliner, fashion, dan produk
+                    kreatif.</small
+                  ></span
+                ></label
+              >
+              <label class="priority-option"
+                ><input type="radio" name="priority" value="3" /><span
+                  ><b>Prioritas reguler</b
+                  ><small
+                    >Usaha umum, reseller, atau usaha dari luar wilayah.</small
+                  ></span
+                ></label
+              >
+            </fieldset>
+            <div class="field-grid">
+              <label
+                >Unggah KTP (opsional untuk demo)<input
+                  type="file"
+                  name="ktp"
+                  accept="image/*,.pdf"
+              /></label>
+              <label
+                >Unggah foto produk (opsional untuk demo)<input
+                  type="file"
+                  name="productPhoto"
+                  accept="image/*"
+              /></label>
+            </div>
+            <p class="form-note">
+              Demo frontend: berkas tidak dikirim ke server. Integrasi upload
+              membutuhkan endpoint backend.
+            </p>
+          </div>
+          <div class="form-actions">
+            <a class="btn btn-light" href="/">Kembali</a
+            ><button class="btn btn-green" type="submit">
+              Daftarkan UMKM sekarang →
+            </button>
+          </div>
+          <p class="privacy-note">
+            Dengan mengirim formulir, Anda menyatakan bahwa data yang diisi
+            benar dan dapat diverifikasi oleh pengelola.
+          </p>
+          <div
+            id="form-message"
+            class="inline-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </form>
+        <aside class="side-stack">
+          <section class="side-card priority-guide">
+            <h2>Kriteria prioritas</h2>
+            <p class="muted">
+              Antrean menggunakan konsep Multi-Level Queue (MLQ).
+            </p>
+            <ul>
+              <li>
+                <span class="dot green-dot"></span
+                ><span
+                  ><b>Queue 1 · Tinggi</b
+                  ><small
+                    >Perajin lokal dan UMKM yang memenuhi kriteria
+                    afirmasi.</small
+                  ></span
+                >
+              </li>
+              <li>
+                <span class="dot blue-dot"></span
+                ><span
+                  ><b>Queue 2 · Menengah</b
+                  ><small>Usaha lokal reguler.</small></span
+                >
+              </li>
+              <li>
+                <span class="dot yellow-dot"></span
+                ><span
+                  ><b>Queue 3 · Reguler</b
+                  ><small>Usaha umum sesuai ketentuan pasar.</small></span
+                >
+              </li>
+            </ul>
+            <div class="info-box">
+              ⓘ Pilihan ini belum menjadi keputusan final. Pengelola perlu
+              memeriksa data pendaftar.
+            </div>
+          </section>
+          <section class="side-card">
+            <h2>Sebelum mendaftar</h2>
+            <p class="muted">
+              Siapkan identitas pemilik, nomor yang aktif, deskripsi produk, dan
+              dokumen pendukung jika tersedia.
+            </p>
+            <a class="text-link" href="/status"
+              >Sudah mendaftar? Cek status →</a
+            >
+          </section>
+        </aside>
+      </div>
+    </main>
+    <footer class="site-footer">
+      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+    </footer>
+  </body>
+</html>
