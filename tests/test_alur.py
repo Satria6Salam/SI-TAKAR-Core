@@ -132,3 +132,31 @@ def test_validasi_dan_404(client):
     assert client.post("/pendaftaran", json={"nama_pemilik": ""}).status_code == 422
     assert client.get("/pendaftaran/999/status").status_code == 404
     assert client.get("/antrean").json() == {"queue_1": [], "queue_2": [], "queue_3": []}
+
+
+def test_dashboard_admin_tersedia(client):
+    assert 'href="/admin/login"' in client.get("/").text
+    response = client.get("/admin")
+    assert response.status_code == 200
+    assert "Dashboard Admin" in response.text
+    assert "/static/css/admin.css" in response.text
+    assert client.get("/admin/ringkasan").json() == {"total": 0, "status": {}}
+
+
+def test_login_admin_membatasi_dashboard_dan_endpoint_admin(client):
+    client.post("/admin/logout")
+    page = client.get("/admin", follow_redirects=False)
+    assert page.status_code == 303
+    assert page.headers["location"] == "/admin/login"
+    assert client.get("/antrean").status_code == 401
+
+    invalid = client.post("/admin/login", json={"username": "admin", "password": "salah"})
+    assert invalid.status_code == 401
+
+    valid = client.post("/admin/login", json={"username": "admin", "password": "admin123"})
+    assert valid.status_code == 200
+    assert client.get("/admin").status_code == 200
+    assert client.get("/antrean").status_code == 200
+
+    client.post("/admin/logout")
+    assert client.get("/admin/ringkasan").status_code == 401

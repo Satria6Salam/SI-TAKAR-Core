@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#173e31" />
+    <title>Dashboard Admin | SI-TAKAR</title>
+    <link rel="stylesheet" href="/static/css/admin.css" />
+    <script src="/static/js/admin.js" defer></script>
+  </head>
+  <body class="admin-page">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/" aria-label="SI-TAKAR, kembali ke beranda">
+        <span class="admin-brand-mark">ST</span>
+        <span><b>SI-TAKAR</b><small>PENGELOLAAN PASAR</small></span>
+      </a>
+      <p class="sidebar-label">RUANG KERJA</p>
+      <nav class="admin-nav" aria-label="Navigasi admin">
+        <a class="selected" href="/admin" aria-current="page"
+          ><span>▦</span>Ringkasan</a
+        >
+        <a href="#antrean"><span>☷</span>Antrean UMKM</a>
+        <a href="#lapak"><span>⌖</span>Denah lapak</a>
+        <a href="#aktivitas"><span>↻</span>Aktivitas sistem</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <span class="service-dot"></span>
+        <span><b>Layanan berjalan</b><small>SI-TAKAR API</small></span>
+        <a
+          href="/docs"
+          aria-label="Buka dokumentasi API"
+          title="Dokumentasi API"
+          >↗</a
+        >
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div class="breadcrumb">
+          <span>SI-TAKAR</span><i>/</i><b>Dashboard</b>
+        </div>
+        <div class="topbar-actions">
+          <span class="today-label" id="today-label"></span>
+          <button
+            class="icon-button"
+            id="refresh-button"
+            type="button"
+            title="Muat ulang data"
+            aria-label="Muat ulang data"
+          >
+            ↻
+          </button>
+          <button
+            class="admin-avatar"
+            id="logout-button"
+            type="button"
+            title="Keluar"
+          >
+            A
+          </button>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <section class="welcome-row">
+          <div>
+            <span class="eyebrow-admin">PANEL PENGELOLA</span>
+            <h1>Ringkasan operasional</h1>
+            <p>
+              Pantau antrean, ketersediaan lapak, dan aktivitas pengelolaan
+              pasar.
+            </p>
+          </div>
+          <button
+            class="btn-admin btn-primary"
+            id="deadlock-button"
+            type="button"
+          >
+            <span>↻</span> Jalankan pemeriksaan
+          </button>
+        </section>
+
+        <div
+          class="notice-bar"
+          id="dashboard-notice"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+
+        <section class="metric-grid" aria-label="Ringkasan statistik">
+          <article class="metric-card metric-applicants">
+            <div class="metric-top">
+              <span class="metric-label">TOTAL PENDAFTAR</span
+              ><span class="metric-icon">◎</span>
+            </div>
+            <strong id="metric-applicants">—</strong>
+            <span class="metric-foot"><i></i> Seluruh status pendaftaran</span>
+          </article>
+          <article class="metric-card metric-queue">
+            <div class="metric-top">
+              <span class="metric-label">DALAM ANTREAN</span
+              ><span class="metric-icon">☷</span>
+            </div>
+            <strong id="metric-queue">—</strong>
+            <span class="metric-foot">Menunggu alokasi lapak</span>
+          </article>
+          <article class="metric-card metric-stalls">
+            <div class="metric-top">
+              <span class="metric-label">LAPAK TERSEDIA</span
+              ><span class="metric-icon">⌖</span>
+            </div>
+            <strong id="metric-empty">—</strong>
+            <span class="metric-foot"
+              ><span id="metric-occupancy">—</span> tingkat keterisian</span
+            >
+          </article>
+          <article class="metric-card metric-alerts">
+            <div class="metric-top">
+              <span class="metric-label">CATATAN PELANGGARAN</span
+              ><span class="metric-icon">!</span>
+            </div>
+            <strong id="metric-violations">—</strong>
+            <span class="metric-foot">Terekam dalam sistem</span>
+          </article>
+        </section>
+
+        <section class="overview-grid">
+          <article class="panel queue-panel" id="antrean">
+            <div class="panel-heading">
+              <div>
+                <span class="section-index">01 / PRIORITAS</span>
+                <h2>Antrean pendaftar</h2>
+              </div>
+              <span class="live-label"><i></i> LIVE</span>
+            </div>
+            <div class="queue-tabs" role="tablist" aria-label="Filter antrean">
+              <button
+                class="queue-tab active"
+                type="button"
+                data-queue-filter="all"
+                aria-pressed="true"
+              >
+                Semua <b id="tab-all">0</b>
+              </button>
+              <button
+                class="queue-tab"
+                type="button"
+                data-queue-filter="1"
+                aria-pressed="false"
+              >
+                Q1 <b id="tab-q1">0</b>
+              </button>
+              <button
+                class="queue-tab"
+                type="button"
+                data-queue-filter="2"
+                aria-pressed="false"
+              >
+                Q2 <b id="tab-q2">0</b>
+              </button>
+              <button
+                class="queue-tab"
+                type="button"
+                data-queue-filter="3"
+                aria-pressed="false"
+              >
+                Q3 <b id="tab-q3">0</b>
+              </button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>USAHA</th>
+                    <th>PEMILIK</th>
+                    <th>QUEUE</th>
+                    <th>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody id="queue-table-body">
+                  <tr>
+                    <td colspan="4" class="table-message">Memuat antrean...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="panel-foot" id="queue-foot">
+              Prioritas MLQ · urut berdasarkan waktu pendaftaran
+            </p>
+          </article>
+
+          <article class="panel occupancy-panel" id="lapak">
+            <div class="panel-heading">
+              <div>
+                <span class="section-index">02 / DENAH</span>
+                <h2>Status lapak</h2>
+              </div>
+              <a
+                class="text-action"
+                href="/docs#/Peta%20Denah%20Pasar/peta_lapak_peta__get"
+                >API denah ↗</a
+              >
+            </div>
+            <div class="stall-summary" id="stall-summary">
+              <div>
+                <i class="legend-dot empty-dot"></i><span>Kosong</span
+                ><b id="stall-empty">—</b>
+              </div>
+              <div>
+                <i class="legend-dot reserved-dot"></i><span>Dipesan</span
+                ><b id="stall-reserved">—</b>
+              </div>
+              <div>
+                <i class="legend-dot occupied-dot"></i><span>Terisi</span
+                ><b id="stall-occupied">—</b>
+              </div>
+            </div>
+            <div
+              class="stall-map"
+              id="stall-map"
+              aria-label="Peta status lapak"
+            ></div>
+            <div class="map-footer">
+              <span><i class="legend-dot empty-dot"></i> Tersedia</span
+              ><span
+                ><i class="legend-dot reserved-dot"></i> Menunggu
+                konfirmasi</span
+              ><span><i class="legend-dot occupied-dot"></i> Aktif</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel activity-panel" id="aktivitas">
+          <div class="panel-heading">
+            <div>
+              <span class="section-index">03 / AUDIT</span>
+              <h2>Aktivitas sistem</h2>
+            </div>
+            <button class="text-action" id="activity-refresh" type="button">
+              Perbarui ↻
+            </button>
+          </div>
+          <div class="activity-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>WAKTU</th>
+                  <th>USAHA</th>
+                  <th>JENIS</th>
+                  <th>CATATAN</th>
+                </tr>
+              </thead>
+              <tbody id="activity-table-body">
+                <tr>
+                  <td colspan="4" class="table-message">Memuat aktivitas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <footer class="admin-footer">
+          <span>SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota</span
+          ><span id="last-updated">Menunggu sinkronisasi</span>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
