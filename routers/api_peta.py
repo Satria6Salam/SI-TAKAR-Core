@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database.config import get_db
 from database.models import AlokasiSewa, Lapak, StatusAlokasi, StatusLapak
+from routers.admin_security import require_admin
 from schemas import LapakCreate
 
 router = APIRouter(prefix="/peta", tags=["Peta Denah Pasar"])
@@ -36,7 +37,7 @@ def peta_lapak(db: Session = Depends(get_db)):
 
 
 @router.post("/lapak", status_code=201)
-def tambah_lapak(data: LapakCreate, db: Session = Depends(get_db)):
+def tambah_lapak(data: LapakCreate, db: Session = Depends(get_db), _admin=Depends(require_admin)):
     """Admin menambah lapak baru ke denah (luas dihitung otomatis: panjang x lebar)."""
     if db.query(Lapak).filter(Lapak.kode_lapak == data.kode_lapak).first():
         raise HTTPException(409, "kode_lapak sudah dipakai")

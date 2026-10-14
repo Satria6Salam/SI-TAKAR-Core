@@ -13,14 +13,22 @@ import pytest
 from fastapi.testclient import TestClient
 
 from database.config import Base, SessionLocal, engine
+from database.models import Admin
+from seed import hash_password
 
 
 @pytest.fixture()
 def client():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    db.add(Admin(username="admin", password_hash=hash_password("admin123")))
+    db.commit()
+    db.close()
     from main import app
     with TestClient(app) as c:
+        login = c.post("/admin/login", json={"username": "admin", "password": "admin123"})
+        assert login.status_code == 200
         yield c
 
 

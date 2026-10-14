@@ -6,6 +6,7 @@ from algoritma.worst_fit import antrean_menunggu, jalankan_alokasi
 from database.config import get_db
 from database.models import AlokasiSewa, StatusAlokasi, StatusPendaftaran, UMKM
 from routers.helpers import alokasi_to_out
+from routers.admin_security import require_admin
 from schemas import StatusAntreanOut, UMKMCreate, UMKMOut
 
 router = APIRouter(tags=["Pendaftaran & Antrean"])
@@ -33,7 +34,7 @@ def status_antrean(umkm_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/antrean")
-def daftar_antrean(db: Session = Depends(get_db)):
+def daftar_antrean(db: Session = Depends(get_db), _admin=Depends(require_admin)):
     """Manajemen Antrean MLQ (admin): pendaftar yang mengantre per Queue."""
     hasil = {"queue_1": [], "queue_2": [], "queue_3": []}
     for u in antrean_menunggu(db).all():
