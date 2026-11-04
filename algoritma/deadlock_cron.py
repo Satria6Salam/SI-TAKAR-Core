@@ -4,16 +4,19 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 
 from algoritma.worst_fit import jalankan_alokasi
-from database.config import PREEMPTION_HARI, utcnow
+from database.config import PREEMPTION_DETIK, TIMEOUT_DETIK, utcnow
 from database.models import (AlokasiSewa, ArsipPelanggaran, StatusAlokasi, StatusLapak,
                              StatusPendaftaran)
 
 
 def cek_timeout(db: Session, now=None) -> list[int]:
-    """Alokasi 'Menunggu Konfirmasi' yang lewat batas_konfirmasi (3 hari) -> hangus.
+    """Alokasi 'Menunggu Konfirmasi' yang lewat batas_konfirmasi -> hangus.
 
-    1) alokasi jadi Dibatalkan  2) UMKM dilempar ke urutan terbawah antrean awalnya
-    3) lapak jadi Kosong        4) dicatat di arsip
+    Sesuai Aturan Deadlock 1 (Timeout):
+    1. Mengubah status hak UMKM tersebut menjadi 'Dibatalkan' (Hangus).
+    2. Melempar posisi UMKM tersebut ke urutan terbawah di antrean awalnya.
+    3. Membuka kembali status lapak tersebut menjadi 'Kosong'.
+    4. Mengalokasikan lapak tersebut ke pendaftar urutan pertama di Queue saat ini.
     Return: daftar umkm_id yang terkena timeout.
     """
     now = now or utcnow()
@@ -24,6 +27,7 @@ def cek_timeout(db: Session, now=None) -> list[int]:
         .all()
     )
     umkm_ids = []
+    durasi_str = f"{TIMEOUT_DETIK} detik (1 menit)" if TIMEOUT_DETIK <= 120 else f"{TIMEOUT_DETIK // 86400} hari"
     for a in kadaluarsa:
         a.status_alokasi = StatusAlokasi.DIBATALKAN
         a.lapak.status_lapak = StatusLapak.KOSONG
@@ -33,8 +37,9 @@ def cek_timeout(db: Session, now=None) -> list[int]:
             umkm_id=a.umkm_id,
             jenis_pelanggaran="Timeout",
             waktu_kejadian=now,
-            keterangan=f"Tidak konfirmasi lapak {a.lapak.kode_lapak} sebelum batas waktu; "
-                       f"dilempar ke urutan terbawah Queue {a.umkm.queue_level}.",
+            keterangan=f"Batas waktu konfirmasi ({durasi_str}) untuk lapak {a.lapak.kode_lapak} telah terlewati tanpa respons. "
+                       f"Status hak dibatalkan (hangus), lapak dibuka kembali menjadi Kosong, "
+                       f"dan UMKM dipindahkan ke urutan terbawah Queue {a.umkm.queue_level}.",
         ))
         umkm_ids.append(a.umkm_id)
     db.commit()
@@ -42,13 +47,18 @@ def cek_timeout(db: Session, now=None) -> list[int]:
 
 
 def cek_preemption(db: Session, now=None) -> list[int]:
-    """Alokasi 'Aktif' yang tidak absen >= 14 hari -> hak sewa dicabut.
+    """Alokasi 'Aktif' yang tidak absen >= batas waktu -> hak sewa dicabut sepihak.
 
-    Lapak kembali Kosong (Hijau), UMKM masuk Arsip Pelanggaran.
+    Sesuai Aturan Deadlock 2 (Preemption):
+    1. Mencabut hak sewa UMKM secara sepihak.
+    2. Menyimpan data UMKM ke dalam 'Arsip Pelanggaran' (catatan rekam jejak).
+    3. Merubah warna lapak di Peta Grid Visual dari Merah (Terisi) menjadi Hijau (Kosong).
+    4. Sistem Worst-Fit akan mendeteksi ruang hijau ini untuk diberikan kepada pendaftar baru.
     Return: daftar umkm_id yang dicabut.
     """
     now = now or utcnow()
-    batas = now - timedelta(days=PREEMPTION_HARI)
+    batas = now - timedelta(seconds=PREEMPTION_DETIK)
+    durasi_str = f"{PREEMPTION_DETIK} detik" if PREEMPTION_DETIK < 86400 else f"{PREEMPTION_DETIK // 86400} hari"
     aktif = db.query(AlokasiSewa).filter(AlokasiSewa.status_alokasi == StatusAlokasi.AKTIF).all()
     umkm_ids = []
     for a in aktif:
@@ -61,8 +71,9 @@ def cek_preemption(db: Session, now=None) -> list[int]:
                 umkm_id=a.umkm_id,
                 jenis_pelanggaran="Preemption",
                 waktu_kejadian=now,
-                keterangan=f"Lapak {a.lapak.kode_lapak} tidak aktif >= {PREEMPTION_HARI} hari; "
-                           f"hak sewa dicabut.",
+                keterangan=f"Lapak {a.lapak.kode_lapak} tidak aktif berjualan selama {durasi_str}. "
+                           f"Hak sewa dicabut secara sepihak (Preemption), disimpan dalam Arsip Pelanggaran, "
+                           f"dan warna lapak dikembalikan menjadi Hijau (Kosong).",
             ))
             umkm_ids.append(a.umkm_id)
     db.commit()

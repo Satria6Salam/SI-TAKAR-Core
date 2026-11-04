@@ -10,6 +10,14 @@ class UMKMCreate(BaseModel):
     jenis_usaha: str = Field(min_length=1, description="mis. kriya, kuliner, fesyen, reseller")
     status_khusus: bool = False
     punya_toko_fisik: bool = False
+    produksi_sendiri: bool = True
+    jumlah_cabang: int = Field(default=1, ge=1)
+    modal_besar: bool = False
+    kebutuhan_luas: float = Field(default=0.0, ge=0)
+    nik: str | None = None
+    nomor_telepon: str | None = None
+    email: str | None = None
+    deskripsi: str | None = None
 
 
 class UMKMOut(BaseModel):
@@ -21,9 +29,18 @@ class UMKMOut(BaseModel):
     jenis_usaha: str
     status_khusus: bool
     punya_toko_fisik: bool
+    produksi_sendiri: bool = True
+    jumlah_cabang: int = 1
+    modal_besar: bool = False
     queue_level: int
     status_pendaftaran: str
     waktu_daftar: datetime
+    kebutuhan_luas: float = 0.0
+    nomor_pendaftaran: str | None = None
+    nik: str | None = None
+    nomor_telepon: str | None = None
+    email: str | None = None
+    deskripsi: str | None = None
 
 
 class AlokasiOut(BaseModel):
@@ -34,10 +51,11 @@ class AlokasiOut(BaseModel):
     status_alokasi: str
     waktu_alokasi: datetime | None
     batas_konfirmasi: datetime | None
-    sisa_detik_konfirmasi: int | None = Field(None, description="Untuk countdown 3 hari di UI")
+    sisa_detik_konfirmasi: int | None = Field(None, description="Untuk countdown konfirmasi di UI (1 menit / 60 detik)")
     terakhir_aktif: datetime | None
     hari_tidak_aktif: int | None = None
-    peringatan: bool = Field(False, description="True jika tidak aktif >= 7 hari (Peringatan 1)")
+    detik_tidak_aktif: int | None = None
+    peringatan: bool = Field(False, description="True jika tidak aktif melebihi batas peringatan")
 
 
 class VerifikasiOut(BaseModel):
@@ -49,7 +67,7 @@ class VerifikasiOut(BaseModel):
 
 class StatusAntreanOut(BaseModel):
     umkm: UMKMOut
-    posisi_dalam_queue: int | None = Field(None, description="None jika sudah tidak meng antre")
+    posisi_dalam_queue: int | None = Field(None, description="None jika sudah tidak mengantre")
     alokasi: AlokasiOut | None = None
     verifikasi: VerifikasiOut | None = None
 

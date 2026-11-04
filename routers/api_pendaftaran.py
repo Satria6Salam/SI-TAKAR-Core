@@ -18,12 +18,24 @@ def daftar_umkm(data: UMKMCreate, db: Session = Depends(get_db)):
     umkm = UMKM(
         **data.model_dump(),
         queue_level=tentukan_queue(data.domisili, data.jenis_usaha,
-                                   data.status_khusus, data.punya_toko_fisik),
+                                   data.status_khusus, data.punya_toko_fisik,
+                                   data.produksi_sendiri, data.jumlah_cabang,
+                                   data.modal_besar),
         status_pendaftaran=StatusPendaftaran.MENUNGGU,
     )
     db.add(umkm)
     db.commit()
+    umkm.nomor_pendaftaran = f"STK-{umkm.waktu_daftar.year}-{umkm.id:06d}"
+    db.commit()
     jalankan_alokasi(db)  # kalau ada lapak kosong, langsung dipanggil
+    return _status(db, umkm.id)
+
+
+@router.get("/pendaftaran/nomor/{nomor_pendaftaran}/status", response_model=StatusAntreanOut)
+def status_dengan_nomor(nomor_pendaftaran: str, db: Session = Depends(get_db)):
+    umkm = db.query(UMKM).filter(UMKM.nomor_pendaftaran == nomor_pendaftaran.upper()).first()
+    if umkm is None:
+        raise HTTPException(404, "Nomor pendaftaran tidak ditemukan")
     return _status(db, umkm.id)
 
 

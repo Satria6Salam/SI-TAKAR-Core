@@ -1,4 +1,4 @@
-"""Autentikasi Admin: login dan pendaftaran akun admin baru."""
+"""Autentikasi Admin: login, pendaftaran akun admin baru, dan verifikasi berkas pendaftar."""
 import hashlib
 import hmac
 import os
@@ -52,11 +52,6 @@ def login_admin(
     form: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    """Login dengan username & password → JWT Bearer token (berlaku 60 menit by default).
-
-    Gunakan token ini sebagai header:
-    `Authorization: Bearer <token>`
-    """
     admin = db.query(Admin).filter(Admin.username == form.username).first()
     if not admin or not verify_password(form.password, admin.password_hash):
         raise HTTPException(
@@ -72,9 +67,8 @@ def login_admin(
 def daftar_admin(
     data: AdminCreate,
     db: Session = Depends(get_db),
-    _admin: Admin = Depends(get_current_admin),  # hanya admin yang login bisa membuat admin baru
+    _admin: Admin = Depends(get_current_admin),
 ):
-    """Daftarkan akun admin baru. **Hanya bisa dilakukan oleh admin yang sudah login.**"""
     if db.query(Admin).filter(Admin.username == data.username).first():
         raise HTTPException(status_code=409, detail="Username sudah dipakai")
     db.add(Admin(username=data.username, password_hash=_hash_password(data.password)))
@@ -84,7 +78,6 @@ def daftar_admin(
 
 @router.post("/daftar-undangan", status_code=201, summary="Daftar akun admin dengan kode undangan")
 def daftar_admin_dengan_undangan(data: AdminInviteCreate, db: Session = Depends(get_db)):
-    """Pendaftaran admin baru memakai kode undangan yang disimpan di konfigurasi server."""
     kode_server = os.getenv("ADMIN_REGISTRATION_KEY")
     if not kode_server:
         raise HTTPException(status_code=503, detail="Pendaftaran admin belum diaktifkan")
@@ -99,15 +92,15 @@ def daftar_admin_dengan_undangan(data: AdminInviteCreate, db: Session = Depends(
 
 @router.get("/saya", summary="Info admin yang sedang login")
 def info_admin(admin: Admin = Depends(get_current_admin)):
-    """Kembalikan data admin berdasarkan token aktif (untuk verifikasi login di frontend)."""
     return {"id": admin.id, "username": admin.username}
 
 
-@router.get("/pendaftar", summary="Daftar pendaftar untuk verifikasi")
+@router.get("/pendaftar", summary="Daftar pendaftar lengkap untuk verifikasi")
 def daftar_pendaftar(
     db: Session = Depends(get_db),
     _admin: Admin = Depends(get_current_admin),
 ):
+    """Menampilkan seluruh input yang dimasukkan oleh pendaftar UMKM agar dibaca oleh Admin."""
     rows = db.query(UMKM).order_by(UMKM.waktu_daftar.desc(), UMKM.id.desc()).all()
     return [
         {
@@ -116,6 +109,17 @@ def daftar_pendaftar(
             "nama_usaha": row.nama_usaha,
             "domisili": row.domisili,
             "jenis_usaha": row.jenis_usaha,
+            "nik": row.nik,
+            "nomor_telepon": row.nomor_telepon,
+            "email": row.email,
+            "deskripsi": row.deskripsi,
+            "status_khusus": row.status_khusus,
+            "punya_toko_fisik": row.punya_toko_fisik,
+            "produksi_sendiri": row.produksi_sendiri,
+            "jumlah_cabang": row.jumlah_cabang,
+            "modal_besar": row.modal_besar,
+            "kebutuhan_luas": row.kebutuhan_luas,
+            "nomor_pendaftaran": row.nomor_pendaftaran,
             "queue_level": row.queue_level,
             "status_pendaftaran": row.status_pendaftaran,
             "waktu_daftar": row.waktu_daftar,
@@ -141,6 +145,7 @@ def verifikasi_pendaftar(
     db: Session = Depends(get_db),
     admin: Admin = Depends(get_current_admin),
 ):
+    """Admin memberikan keputusan verifikasi (Terverifikasi/Perlu Perbaikan) & catatan."""
     umkm = db.get(UMKM, umkm_id)
     if umkm is None:
         raise HTTPException(status_code=404, detail="Pendaftar tidak ditemukan")

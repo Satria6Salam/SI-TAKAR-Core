@@ -7,7 +7,7 @@ from database.config import Base, utcnow
 # ---- Konstanta status (dipakai bersama oleh algoritma & router) ----
 class StatusLapak:
     KOSONG = "Kosong"      # Hijau  - bisa dialokasikan
-    DIPESAN = "Dipesan"    # Kuning - sudah dialokasikan, menunggu konfirmasi (<= 3 hari)
+    DIPESAN = "Dipesan"    # Kuning - sudah dialokasikan, menunggu konfirmasi
     TERISI = "Terisi"      # Merah  - sudah dikonfirmasi & aktif
 
 
@@ -41,8 +41,17 @@ class UMKM(Base):
     nama_usaha = Column(String, nullable=False)
     domisili = Column(String, nullable=False)
     jenis_usaha = Column(String, nullable=False)
+    nik = Column(String, nullable=True)
+    nomor_telepon = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    deskripsi = Column(Text, nullable=True)
     status_khusus = Column(Boolean, default=False)
     punya_toko_fisik = Column(Boolean, default=False)
+    produksi_sendiri = Column(Boolean, default=True, nullable=False)
+    jumlah_cabang = Column(Integer, default=1, nullable=False)
+    modal_besar = Column(Boolean, default=False, nullable=False)
+    kebutuhan_luas = Column(Float, default=0.0, nullable=False)
+    nomor_pendaftaran = Column(String)
     queue_level = Column(Integer, nullable=False)
     status_pendaftaran = Column(String, default=StatusPendaftaran.MENUNGGU)
     waktu_daftar = Column(DateTime, default=utcnow)

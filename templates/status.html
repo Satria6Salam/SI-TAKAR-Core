@@ -3,93 +3,116 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Status Pendaftaran | SI-TAKAR</title>
+    <title>Cek Status Kios &amp; Konfirmasi | SI-TAKAR</title>
     <link rel="stylesheet" href="../static/css/style.css" />
     <script src="../static/js/app.js" defer></script>
   </head>
-  <body>
+  <body class="status-page">
     <header class="public-nav">
-      <a class="brand" href="./index.html"
-        ><span class="brand-mark">▦</span
-        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
-      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+      <a class="brand" href="./index.html" aria-label="Beranda SI-TAKAR">
+        <span class="brand-mark">▦</span>
+        <span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span>
+      </a>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
         ☰
       </button>
       <nav class="nav-links" data-nav>
-        <a href="./index.html">Beranda</a
-        ><a href="./pendaftaran.html">Pendaftaran</a
-        ><a class="active" href="./status.html">Status</a
-        ><a href="./admin.html">Admin</a>
+        <a href="./index.html">Beranda</a>
+        <a href="./pendaftaran.html">Daftar Kios</a>
+        <a class="active" href="./status.html">Cek Status &amp; Kios</a>
+        <a href="./admin.html">Login Admin</a>
       </nav>
-      <a class="help-link" href="./index.html#bantuan"
-        >ⓘ <span>Bantuan</span></a
-      >
+      <a class="help-link" href="./index.html#bantuan">ⓘ <span>Bantuan Pengelola</span></a>
     </header>
+
     <main class="status-shell">
       <div class="page-intro">
-        <span class="kicker">STATUS PENGAJUAN</span>
-        <h1>Periksa status pendaftaran</h1>
+        <span class="kicker">PANEL PELACAKAN PENDAFTAR</span>
+        <h1>Status Antrean &amp; Pengambilan Kios</h1>
         <p>
-          Status verifikasi dan nama petugas ditampilkan setelah pengelola
-          memeriksa pengajuan.
+          Pantau posisi antrean Anda, lihat hasil verifikasi berkas oleh pengelola pasar,
+          dan segera <b>ambil kios Anda dalam 1 menit</b> saat kios berhasil ditemukan.
         </p>
       </div>
+
+      <!-- KOTAK PENCARIAN NOMOR PENDAFTARAN -->
       <section class="status-search card">
         <form id="status-search-form">
-          <label for="status-code">Nomor pendaftaran</label>
+          <label for="status-code" style="font-weight: 700; margin-bottom: 6px; display: block;">
+            Masukkan Nomor Pendaftaran Anda:
+          </label>
           <div class="search-row">
             <input
               id="status-code"
-              placeholder="Contoh: STK-2026-0001"
-            /><button class="btn btn-green" type="submit">
-              Periksa status
+              placeholder="Contoh: STK-2026-000001"
+              required
+              autocomplete="off"
+              style="font-size: 16px; font-weight: 600;"
+            />
+            <button class="btn btn-green" type="submit" style="padding: 0 24px; font-size: 14px;">
+              Periksa Status Saya
             </button>
           </div>
         </form>
-      </section>
-      <section id="status-result" class="status-result card" aria-live="polite">
-        <div class="empty-state">
-          <span class="empty-icon">⌕</span>
-          <h2>Belum ada pengajuan yang dipilih</h2>
-          <p>Masukkan nomor pendaftaran atau kirim formulir terlebih dahulu.</p>
-          <a class="btn btn-outline" href="./pendaftaran.html">Daftar UMKM</a>
+
+        <div id="recent-registration-pill" style="margin-top: 12px; display: none;">
+          <small class="muted">Pendaftaran terakhir di perangkat ini: </small>
+          <button id="btn-quick-check" type="button" class="btn btn-light" style="padding: 4px 10px; font-size: 12px; height: auto; min-height: 28px;">
+            <b id="recent-reg-code"></b> (<span id="recent-reg-business"></span>)
+          </button>
         </div>
       </section>
+
+      <!-- HASIL PEMERIKSAAN DINAMIS -->
+      <div id="status-container">
+        <section id="status-result" class="status-result card" aria-live="polite">
+          <div class="empty-state">
+            <span class="empty-icon">🔍</span>
+            <h2>Masukkan Nomor Pendaftaran Anda di Atas</h2>
+            <p>
+              Nomor pendaftaran Anda berawalan <code>STK-...</code> yang didapatkan setelah selesai mengisi formulir.
+            </p>
+            <a class="btn btn-outline" href="./pendaftaran.html">Daftar Kios UMKM Baru</a>
+          </div>
+        </section>
+      </div>
+
+      <!-- TIMELINE TAHAPAN RAMAH PENGGUNA -->
       <section class="timeline-card card">
-        <h2>Bagaimana prosesnya?</h2>
+        <h2>Tahapan Alur Pengajuan Kios Anda</h2>
         <div class="timeline">
-          <div class="timeline-item done">
-            <span>✓</span>
+          <div class="timeline-item" id="step-1">
+            <span>1</span>
             <div>
-              <b>Pendaftaran diterima</b><small>Data awal tersimpan</small>
+              <b>1. Pendaftaran &amp; Evaluasi Otomatis</b>
+              <small>Data diterima dan otomatis ditempatkan di antrean prioritas Keadilan Sosial.</small>
             </div>
           </div>
-          <div class="timeline-item current">
+          <div class="timeline-item" id="step-2">
             <span>2</span>
             <div>
-              <b>Verifikasi data</b
-              ><small
-                >Pengelola memeriksa informasi dan kriteria prioritas</small
-              >
+              <b>2. Verifikasi Berkas Pengelola</b>
+              <small>Admin pengelola pasar memeriksa kesesuaian identitas dan syarat UMKM.</small>
             </div>
           </div>
-          <div class="timeline-item">
+          <div class="timeline-item" id="step-3">
             <span>3</span>
             <div>
-              <b>Penempatan antrean</b
-              ><small>Pendaftar dimasukkan ke antrean yang sesuai</small>
+              <b>3. Penyiapan Kios (Worst-Fit) &amp; Konfirmasi 1 Menit</b>
+              <small>Sistem mencarikan kios terluas. Anda diberi waktu 1 menit untuk konfirmasi.</small>
             </div>
           </div>
-          <div class="timeline-item">
+          <div class="timeline-item" id="step-4">
             <span>4</span>
             <div>
-              <b>Informasi alokasi kios</b
-              ><small>Pendaftar menerima informasi jika tersedia alokasi</small>
+              <b>4. Siap Jualan &amp; Absensi Buka Toko</b>
+              <small>Kios sah ditempati. Buka toko setiap hari untuk menjaga hak sewa tetap aktif.</small>
             </div>
           </div>
         </div>
       </section>
     </main>
+
     <footer class="site-footer">
       © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
     </footer>

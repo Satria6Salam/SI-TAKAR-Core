@@ -1,25 +1,27 @@
-# SI-TAKAR Frontend — Starter
+# SI-TAKAR Frontend
 
-Frontend awal berbasis HTML, CSS, dan JavaScript murni dengan visual terinspirasi dari file Figma SI-TAKAR yang diberikan.
+Antarmuka HTML, CSS, dan JavaScript terhubung ke API FastAPI untuk pendaftaran, antrean, status lapak, konfirmasi, dan aktivitas penyewa.
 
 ## Halaman
+
 - `index.html` — beranda publik dan ringkasan ketersediaan kios.
 - `pendaftaran.html` — formulir pendaftaran UMKM dengan validasi.
 - `status.html` — pencarian status pendaftaran demo.
 - `profil.html` — profil dan aktivitas penyewa demo.
 
 ## Menjalankan di VS Code
+
 1. Ekstrak ZIP ini.
 2. Buka folder `si-takar-frontend` di VS Code.
 3. Klik kanan `index.html` lalu pilih **Open with Live Server** (jika ekstensi Live Server tersedia).
 4. Jika belum memasang Live Server, buka `index.html` langsung melalui browser.
 
-## Interaksi saat ini
-- Navigasi antarhalaman.
-- Validasi dasar pada formulir.
-- Formulir demo menyimpan data di `localStorage` browser.
-- Halaman Status membaca data demo tersebut.
-- Tombol aktivitas di Profil memberi umpan balik di halaman.
+## Alur yang tersedia
 
-## Penting
-Ini adalah prototype frontend, belum terhubung ke FastAPI atau database. Data formulir disimpan hanya pada browser yang sama. File upload hanya tampil sebagai input dan belum mengirim berkas. Nilai statistik/kios pada beranda dan profil adalah data contoh. Sebelum integrasi, sesuaikan URL endpoint, nama field, skema backend, dan aturan validasi dengan kode Fajar. Jangan menimpa file di repository tim; bandingkan dulu dan pindahkan perubahan ke branch frontend Mahsa.
+- Formulir mengirim data pendaftaran dan kriteria MLQ ke API.
+- Nomor pendaftaran diterbitkan server dan dapat dicari melalui halaman Status.
+- Halaman Status menampilkan antrean, verifikasi, alokasi, serta aksi konfirmasi lapak.
+- Panel Profil mengirim aktivitas buka kios ke API.
+- Dashboard Admin menampilkan antrean, verifikasi, denah lapak, dan log Timeout/Preemption.
+
+Unggah dokumen pendukung belum diimplementasikan. Jalankan `python seed.py` untuk membuat lapak dan akun admin awal pada database development.
