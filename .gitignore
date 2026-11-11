@@ -4,3 +4,7 @@ __pycache__/
 .env
 *.db
 .pytest_cache/
+.venv/
+*.db.lama
+*.db.lama*
+unggahan/

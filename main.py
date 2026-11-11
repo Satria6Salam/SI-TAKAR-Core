@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -9,9 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+import seed
 from algoritma.deadlock_cron import jalankan_semua
-from database import models  # penting: supaya semua model ke-load sebelum create_all
-from database.config import CRON_INTERVAL_DETIK, SessionLocal, Base, engine
+from database.config import AUTO_SEED, CRON_INTERVAL_DETIK, SessionLocal, siapkan_database
 from routers import api_admin, api_alokasi, api_pendaftaran, api_peta
 
 # Konfigurasi Direktori Frontend & Templates
@@ -42,7 +41,13 @@ async def _cron_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    siapkan_database()
+    if AUTO_SEED:
+        db = SessionLocal()
+        try:
+            seed.isi_awal(db)
+        finally:
+            db.close()
     task = None
     if CRON_INTERVAL_DETIK > 0:
         task = asyncio.create_task(_cron_loop())
@@ -51,7 +56,7 @@ async def lifespan(app: FastAPI):
         task.cancel()
 
 
-app = FastAPI(title="SI-TAKAR App", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="SI-TAKAR App", version="1.0.0", lifespan=lifespan)
 
 # Izinkan frontend/desainer memanggil API dari origin lain saat development
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -95,6 +100,11 @@ def status_page():
 @app.get("/profil.html", include_in_schema=False)
 def profile_page():
     return serve_page("profil.html")
+
+
+@app.get("/lupa-kode", include_in_schema=False)
+def forgot_code_page():
+    return serve_page("lupa_kode.html")
 
 
 # Cek Status API (Root Endpoint untuk Backend)

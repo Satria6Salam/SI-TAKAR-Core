@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/css/style.css" />
     <script src="/static/js/app.js" defer></script>
   </head>
-  <body class="public-page">
+  <body class="public-page" data-page="beranda">
     <header class="public-nav">
       <a class="brand" href="/" aria-label="SI-TAKAR Beranda">
         <span class="brand-mark">▦</span
@@ -20,20 +20,21 @@
         <a class="active" href="/">Beranda</a>
         <a href="/pendaftaran">Pendaftaran</a>
         <a href="/status">Status</a>
+        <a href="/profil">Lapak Saya</a>
         <a href="/admin/login">Admin</a>
       </nav>
-      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan 1500-721</span></a>
+      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
     </header>
-    <div class=""></div>
     <main>
       <section class="hero">
         <div class="hero-copy">
           <span class="eyebrow"><i></i> PENDAFTARAN KIOS DIBUKA</span>
-          <h1>Kios pasar seni yang tepat, lewat proses yang jelas.</h1>
+          <h1>Kios pasar seni yang tepat, lewat proses yang adil.</h1>
           <p>
-            SI-TAKAR membantu pedagang UMKM mendaftar, melihat antrean, dan
-            memperoleh kios sesuai kebutuhan—tanpa harus bolak-balik ke kantor
-            pengelola.
+            SI-TAKAR membagi lapak bukan berdasarkan siapa yang paling cepat,
+            melainkan siapa yang paling berhak. Antrean, alokasi ruang, dan
+            batas waktu dijalankan otomatis oleh sistem dan bisa dipantau siapa
+            saja.
           </p>
           <div class="hero-actions">
             <a class="btn btn-coral" href="/pendaftaran"
@@ -42,104 +43,114 @@
             <a class="btn btn-light" href="/status">Cek status pendaftaran</a>
           </div>
           <div class="trust-row">
-            <span>✓ Gratis mendaftar</span><span>✓ Antrean transparan</span
-            ><span>✓ Bantuan petugas tersedia</span>
+            <span>✓ Gratis mendaftar</span><span>✓ Prioritas dihitung sistem</span
+            ><span>✓ Denah pasar terbuka</span>
           </div>
         </div>
         <aside class="availability-card">
           <div class="card-heading">
             <div>
-              <h2>Ketersediaan hari ini</h2>
-              <p class="muted small">Data contoh untuk demonstrasi</p>
+              <h2>Ketersediaan ruang saat ini</h2>
+              <p class="muted small" id="avail-updated">Memuat data pasar…</p>
             </div>
-            <span class="pill pill-green"><i></i> Data aktif</span>
+            <span class="pill pill-green"><i></i> Langsung dari sistem</span>
           </div>
           <div class="metric-pair">
             <div class="metric metric-green">
-              <strong id="empty-count">18</strong><span>Kios kosong</span>
+              <strong id="avail-empty">–</strong><span>meter muka masih kosong</span>
             </div>
             <div class="metric metric-cream">
-              <strong>64</strong><span>Total kios</span>
+              <strong id="avail-total">–</strong><span>meter total pasar</span>
             </div>
           </div>
-          <div class="zone-list">
-            <div class="zone-row">
-              <div><span>Zona A · Kerajinan</span><b>8 kosong</b></div>
-              <div class="progress"><i style="width: 59%"></i></div>
-            </div>
-            <div class="zone-row">
-              <div>
-                <span>Zona B · Kuliner kering</span
-                ><b class="coral-text">4 kosong</b>
-              </div>
-              <div class="progress">
-                <i class="coral-fill" style="width: 75%"></i>
-              </div>
-            </div>
-            <div class="zone-row">
-              <div>
-                <span>Zona C · Tekstil &amp; seni</span
-                ><b class="coral-text">6 kosong</b>
-              </div>
-              <div class="progress">
-                <i class="coral-fill" style="width: 67%"></i>
-              </div>
-            </div>
-          </div>
-          <div class="recommendation">
-            ✦ Zona A memiliki blok kosong terbesar, cocok untuk kebutuhan kios
-            2×2 m.
-          </div>
+          <div class="zone-list" id="zone-list"></div>
+          <div class="recommendation" id="avail-note" hidden></div>
         </aside>
       </section>
 
       <section class="process-section">
         <div class="section-heading">
           <div>
-            <span class="kicker">ALUR YANG MUDAH DIIKUTI</span>
-            <h2>Mulai dari pendaftaran hingga menempati kios.</h2>
+            <span class="kicker">DENAH PASAR TERKINI</span>
+            <h2>Setiap lorong dipotong sesuai kebutuhan.</h2>
           </div>
           <p>
-            Proses dibuat transparan agar setiap pelaku UMKM mengetahui tahap
-            dan status pengajuannya.
+            Lapak baru selalu dipotong dari ruang kosong yang paling luas,
+            supaya sisa ruangnya tetap layak disewa pedagang berikutnya.
+          </p>
+        </div>
+        <div class="card map-card">
+          <div class="zone-strips" id="public-map">
+            <p class="muted small">Memuat denah…</p>
+          </div>
+          <div class="map-legend">
+            <span><i class="sw sw-kosong"></i> Kosong</span>
+            <span><i class="sw sw-dipesan"></i> Dipesan, menunggu konfirmasi</span>
+            <span><i class="sw sw-terisi"></i> Terisi</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="process-section" id="aturan">
+        <div class="section-heading">
+          <div>
+            <span class="kicker">ATURAN YANG DIJALANKAN SISTEM</span>
+            <h2>Dari pendaftaran hingga menempati kios.</h2>
+          </div>
+          <p>
+            Empat tahap berikut berjalan otomatis. Tidak ada tahap yang bisa
+            dilompati atau ditahan oleh satu pihak.
           </p>
         </div>
         <div class="process-grid">
           <article class="process-card">
             <span class="process-icon">▤</span><b>01</b>
-            <h3>Daftar UMKM</h3>
-            <p>Isi data pemilik, informasi usaha, dan kebutuhan kios.</p>
+            <h3>Daftar &amp; dinilai</h3>
+            <p>
+              Sistem membaca domisili, jenis usaha, dan asal produk, lalu
+              menempatkan Anda di Queue 1, 2, atau 3.
+            </p>
           </article>
           <article class="process-card">
             <span class="process-icon">☷</span><b>02</b>
-            <h3>Masuk antrean</h3>
-            <p>Sistem mengelompokkan pendaftar sesuai kriteria prioritas.</p>
+            <h3>Antre sesuai prioritas</h3>
+            <p>
+              Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Di
+              dalam satu queue berlaku siapa lebih dulu.
+            </p>
           </article>
           <article class="process-card">
             <span class="process-icon">⌖</span><b>03</b>
-            <h3>Pilih alokasi</h3>
-            <p>Petugas mengelola alokasi berdasarkan ketersediaan kios.</p>
+            <h3>Lapak dipotong</h3>
+            <p>
+              Ruang kosong terluas dipotong sepanjang kebutuhan Anda. Anda punya
+              <span data-info="timeout_hari">3</span> hari untuk konfirmasi.
+            </p>
           </article>
           <article class="process-card">
             <span class="process-icon">♧</span><b>04</b>
-            <h3>Konfirmasi kios</h3>
+            <h3>Buka kios rutin</h3>
             <p>
-              Periksa informasi alokasi dan lakukan konfirmasi sesuai batas
-              waktu.
+              Tutup <span data-info="peringatan_hari">7</span> hari kena
+              peringatan, tutup <span data-info="preemption_hari">14</span> hari
+              hak sewa dicabut untuk antrean berikutnya.
             </p>
           </article>
         </div>
       </section>
       <section class="bottom-help" id="bantuan">
         <div>
-          <b>Perlu bantuan pendaftaran?</b>
-          <p>Hubungi petugas pengelola pasar untuk mendapatkan arahan.</p>
+          <b>Sudah punya kode pendaftaran?</b>
+          <p>
+            Pantau posisi antrean, konfirmasi lapak, dan catat kios buka dari
+            halaman Status dan Lapak Saya.
+          </p>
         </div>
-        <a class="btn btn-outline" href="/pendaftaran">Mulai pendaftaran →</a>
+        <a class="btn btn-outline" href="/status">Cek status →</a>
       </section>
     </main>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
     </footer>
   </body>
 </html>

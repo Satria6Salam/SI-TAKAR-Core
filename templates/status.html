@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/css/style.css" />
     <script src="/static/js/app.js" defer></script>
   </head>
-  <body>
+  <body data-page="status">
     <header class="public-nav">
       <a class="brand" href="/"
         ><span class="brand-mark">▦</span
@@ -17,77 +17,58 @@
       </button>
       <nav class="nav-links" data-nav>
         <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
-        ><a class="active" href="/status">Status</a>
+        ><a class="active" href="/status">Status</a
+        ><a href="/profil">Lapak Saya</a>
       </nav>
-      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
     </header>
     <main class="status-shell">
       <div class="page-intro">
-        <span class="kicker">STATUS PENGAJUAN</span>
+        <span class="kicker">STATUS ANTREAN</span>
         <h1>Periksa status pendaftaran</h1>
         <p>
-          Informasi pada halaman ini disimpan secara lokal di browser untuk
-          demonstrasi frontend.
+          Masukkan kode pendaftaran untuk melihat jalur antrean, posisi Anda,
+          dan lapak yang dialokasikan. Halaman ini memperbarui diri otomatis.
         </p>
       </div>
       <section class="status-search card">
         <form id="status-search-form">
-          <label for="status-code">Nomor pendaftaran</label>
+          <label for="status-code">Kode pendaftaran</label>
           <div class="search-row">
             <input
               id="status-code"
-              placeholder="Contoh: STK-2026-0001"
+              placeholder="Contoh: STK-7K4M2Q"
+              autocomplete="off"
+              maxlength="12"
             /><button class="btn btn-green" type="submit">
               Periksa status
             </button>
           </div>
+          <p class="form-note">
+            Lupa kode pendaftaran?
+            <a class="text-link inline" href="/lupa-kode">Cari dengan NIK dan nomor telepon →</a>
+          </p>
         </form>
       </section>
       <section id="status-result" class="status-result card" aria-live="polite">
         <div class="empty-state">
           <span class="empty-icon">⌕</span>
-          <h2>Belum ada pengajuan yang dipilih</h2>
-          <p>Masukkan nomor pendaftaran atau kirim formulir terlebih dahulu.</p>
+          <h2>Belum ada pendaftaran yang dipilih</h2>
+          <p>Masukkan kode pendaftaran atau kirim formulir terlebih dahulu.</p>
           <a class="btn btn-outline" href="/pendaftaran">Daftar UMKM</a>
         </div>
       </section>
-      <section class="timeline-card card">
-        <h2>Bagaimana prosesnya?</h2>
-        <div class="timeline">
-          <div class="timeline-item done">
-            <span>✓</span>
-            <div>
-              <b>Pendaftaran diterima</b><small>Data awal tersimpan</small>
-            </div>
-          </div>
-          <div class="timeline-item current">
-            <span>2</span>
-            <div>
-              <b>Verifikasi data</b
-              ><small
-                >Pengelola memeriksa informasi dan kriteria prioritas</small
-              >
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span>3</span>
-            <div>
-              <b>Penempatan antrean</b
-              ><small>Pendaftar dimasukkan ke antrean yang sesuai</small>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span>4</span>
-            <div>
-              <b>Informasi alokasi kios</b
-              ><small>Pendaftar menerima informasi jika tersedia alokasi</small>
-            </div>
-          </div>
-        </div>
+      <section class="timeline-card card" id="process-card" hidden>
+        <h2>Tahap Anda saat ini</h2>
+        <div class="timeline" id="process-timeline"></div>
+      </section>
+      <section class="timeline-card card" id="history-card" hidden>
+        <h2>Riwayat pendaftaran</h2>
+        <div id="history-list"></div>
       </section>
     </main>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
     </footer>
   </body>
 </html>

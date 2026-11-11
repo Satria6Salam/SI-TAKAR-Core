@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lupa Kode | SI-TAKAR</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="/static/js/app.js" defer></script>
+  </head>
+  <body data-page="lupa">
+    <header class="public-nav">
+      <a class="brand" href="/"
+        ><span class="brand-mark">▦</span
+        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
+      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
+        ☰
+      </button>
+      <nav class="nav-links" data-nav>
+        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
+        ><a href="/status">Status</a><a href="/profil">Lapak Saya</a>
+      </nav>
+      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
+    </header>
+    <main class="status-shell">
+      <div class="page-intro">
+        <span class="kicker">LUPA KODE PENDAFTARAN</span>
+        <h1>Temukan pendaftaran Anda</h1>
+        <p>
+          Masukkan NIK dan nomor telepon yang dipakai saat mendaftar. Semua
+          pendaftaran milik Anda, termasuk yang sudah selesai, akan ditampilkan.
+        </p>
+      </div>
+      <section class="card status-search">
+        <form id="lupa-form" class="field-grid">
+          <label
+            >NIK / nomor KTP<input
+              name="nik"
+              required
+              inputmode="numeric"
+              pattern="[0-9]{16}"
+              minlength="16"
+              maxlength="16"
+              placeholder="16 digit NIK"
+          /></label>
+          <label
+            >Nomor telepon saat mendaftar<input
+              name="telepon"
+              type="tel"
+              required
+              minlength="6"
+              maxlength="20"
+              placeholder="08xxxxxxxxxx"
+          /></label>
+          <div class="full-field">
+            <button class="btn btn-green" type="submit">Cari pendaftaran</button>
+          </div>
+        </form>
+        <p class="form-note">
+          Demi keamanan, pencarian dikunci sementara setelah 5 kali data tidak
+          cocok.
+        </p>
+      </section>
+      <section class="card status-result" id="lupa-result" hidden aria-live="polite"></section>
+      <section class="card timeline-card">
+        <h2>Lupa PIN?</h2>
+        <p class="muted small">
+          PIN tidak bisa ditampilkan ulang karena disimpan dalam bentuk
+          terenkripsi. Datanglah ke kantor pengelola pasar dengan membawa KTP
+          asli. Setelah identitas dicocokkan, pengelola akan membuatkan PIN
+          baru.
+        </p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
+    </footer>
+  </body>
+</html>

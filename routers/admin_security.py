@@ -19,6 +19,12 @@ if not SESSION_SECRET:
 SESSION_SECRET = SESSION_SECRET.encode()
 
 
+def hash_password(password: str) -> str:
+    salt = os.urandom(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100_000)
+    return f"{salt.hex()}${dk.hex()}"
+
+
 def verify_password(password: str, password_hash: str) -> bool:
     try:
         salt_hex, expected_hex = password_hash.split("$", 1)

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/css/style.css" />
     <script src="/static/js/app.js" defer></script>
   </head>
-  <body class="form-page">
+  <body class="form-page" data-page="pendaftaran">
     <header class="public-nav">
       <a class="brand" href="/"
         ><span class="brand-mark">▦</span
@@ -19,35 +19,36 @@
       <nav class="nav-links" data-nav>
         <a href="/">Beranda</a
         ><a class="active" href="/pendaftaran">Pendaftaran</a
-        ><a href="/status">Status</a>
+        ><a href="/status">Status</a><a href="/profil">Lapak Saya</a>
       </nav>
-      <a class="help-link" href="/#bantuan">ⓘ <span>Bantuan</span></a>
+      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
     </header>
     <main class="form-shell">
       <div class="page-intro">
         <span class="kicker">PENDAFTARAN UMKM</span>
         <h1>Daftarkan usaha Anda</h1>
         <p>
-          Lengkapi informasi berikut agar pengelola dapat memproses permohonan
-          kios dengan tepat.
+          Isi data apa adanya. Jalur antrean Anda dihitung sistem dari jawaban
+          di bawah, bukan dipilih sendiri, dan alasannya langsung ditampilkan.
         </p>
       </div>
       <div class="form-layout">
-        <form id="registration-form" class="form-card">
+        <form id="registration-form" class="form-card" novalidate>
           <div class="form-section">
             <div class="form-section-title">
               <span class="step-number">1</span>
               <div>
-                <h2>Informasi identitas pemilik</h2>
-                <p>Informasi pemilik yang bertanggung jawab atas usaha.</p>
+                <h2>Identitas pemilik</h2>
+                <p>Satu NIK hanya boleh memiliki satu pendaftaran berjalan.</p>
               </div>
             </div>
             <div class="field-grid">
               <label
                 >Nama lengkap pemilik <span class="required">*</span
                 ><input
-                  name="owner"
+                  name="nama_pemilik"
                   required
+                  maxlength="120"
                   placeholder="Contoh: Siti Aminah"
                   autocomplete="name"
               /></label>
@@ -65,9 +66,11 @@
               <label
                 >Nomor WhatsApp / telepon <span class="required">*</span
                 ><input
-                  name="phone"
+                  name="telepon"
                   required
                   type="tel"
+                  minlength="6"
+                  maxlength="20"
                   placeholder="Contoh: 08xxxxxxxxxx"
                   autocomplete="tel"
               /></label>
@@ -75,125 +78,186 @@
                 >Email (opsional)<input
                   name="email"
                   type="email"
+                  maxlength="120"
                   placeholder="nama@email.com"
               /></label>
             </div>
+            <fieldset class="priority-options choice-row">
+              <legend>
+                Domisili sesuai KTP <span class="required">*</span>
+              </legend>
+              <label class="priority-option"
+                ><input type="radio" name="asal" value="lokal" checked /><span
+                  ><b>Warga <span data-info="domisili_pasar">kota ini</span></b
+                  ><small>KTP beralamat di kota/kabupaten lokasi pasar.</small></span
+                ></label
+              >
+              <label class="priority-option"
+                ><input type="radio" name="asal" value="luar" /><span
+                  ><b>Luar kota</b
+                  ><small>KTP beralamat di kota/kabupaten lain.</small></span
+                ></label
+              >
+            </fieldset>
+            <div class="field-grid" id="kota-asal-wrap" hidden>
+              <label
+                >Kota / kabupaten asal <span class="required">*</span
+                ><input name="kota_asal" maxlength="80" placeholder="Contoh: Surabaya"
+              /></label>
+            </div>
           </div>
+
           <div class="form-section">
             <div class="form-section-title">
               <span class="step-number">2</span>
               <div>
                 <h2>Informasi usaha</h2>
-                <p>Jelaskan usaha dan produk yang akan dijual di pasar.</p>
+                <p>Jawaban di bagian ini menentukan jalur antrean Anda.</p>
               </div>
             </div>
             <div class="field-grid">
               <label
                 >Nama usaha / toko <span class="required">*</span
                 ><input
-                  name="business"
+                  name="nama_usaha"
                   required
+                  maxlength="120"
                   placeholder="Nama toko atau merek"
               /></label>
               <label
-                >Kategori produk <span class="required">*</span
-                ><select name="category" required>
-                  <option value="">Pilih kategori</option>
-                  <option>Kriya / kerajinan</option>
-                  <option>Kuliner</option>
-                  <option>Fashion / tekstil</option>
-                  <option>Seni dan antik</option>
-                  <option>Jasa kreatif</option>
-                  <option>Lainnya</option>
+                >Jenis usaha <span class="required">*</span
+                ><select name="jenis_usaha" required>
+                  <option value="">Pilih jenis usaha</option>
+                  <option value="kriya">Kriya / kerajinan tangan</option>
+                  <option value="seni rupa">Seni rupa (lukis, patung, batik tulis)</option>
+                  <option value="antik">Barang antik otentik</option>
+                  <option value="kuliner">Kuliner (makanan / minuman)</option>
+                  <option value="fesyen">Fesyen / pakaian</option>
+                  <option value="aksesoris">Aksesoris</option>
+                  <option value="jasa kreatif">Jasa kreatif (lukis wajah, suvenir)</option>
+                  <option value="lainnya">Lainnya</option>
+                </select></label
+              >
+              <label
+                >Asal produk yang dijual <span class="required">*</span
+                ><select name="sumber_produk" required>
+                  <option value="buatan_sendiri">Buatan / produksi sendiri</option>
+                  <option value="reseller">Reseller barang pabrik</option>
+                  <option value="waralaba">Waralaba (franchise)</option>
+                  <option value="impor">Produk impor</option>
+                </select></label
+              >
+              <label
+                >Toko / ruko fisik yang sudah dimiliki <span class="required">*</span
+                ><select name="jumlah_cabang" required>
+                  <option value="0">Belum punya (baru merintis)</option>
+                  <option value="1">1 toko</option>
+                  <option value="2">2 toko</option>
+                  <option value="3">3 toko atau lebih</option>
                 </select></label
               >
               <label class="full-field"
-                >Deskripsi singkat produk <span class="required">*</span
-                ><textarea
-                  name="description"
-                  required
+                >Deskripsi singkat produk<textarea
+                  name="deskripsi"
                   rows="3"
+                  maxlength="500"
                   placeholder="Ceritakan produk utama dan ciri khas usaha Anda"
                 ></textarea>
               </label>
-              <label
-                >Kebutuhan ukuran kios <span class="required">*</span
-                ><select name="stallSize" required>
-                  <option value="">Pilih ukuran</option>
-                  <option>2 × 2 meter</option>
-                  <option>2 × 3 meter</option>
-                  <option>3 × 3 meter</option>
-                </select></label
-              >
-              <label
-                >Kebutuhan listrik<select name="electricity">
-                  <option>Tidak membutuhkan</option>
-                  <option>Ya, kebutuhan ringan</option>
-                  <option>Ya, kebutuhan sedang</option>
-                </select></label
-              >
             </div>
-          </div>
-          <div class="form-section">
-            <div class="form-section-title">
-              <span class="step-number">3</span>
-              <div>
-                <h2>Pilihan prioritas dan dokumen</h2>
-                <p>
-                  Pilih kondisi yang sesuai. Penetapan antrean akhir mengikuti
-                  verifikasi pengelola.
-                </p>
-              </div>
-            </div>
-            <fieldset class="priority-options">
-              <legend>
-                Pilihan kategori prioritas <span class="required">*</span>
-              </legend>
+            <fieldset class="priority-options afirmasi">
+              <legend>Status khusus (afirmasi)</legend>
               <label class="priority-option"
-                ><input type="radio" name="priority" value="1" required /><span
-                  ><b>Prioritas tinggi</b
+                ><input type="checkbox" name="status_khusus" /><span
+                  ><b>Saya penyandang disabilitas atau warga pra-sejahtera</b
                   ><small
-                    >Perajin lokal, UMKM rentan, atau pelaku usaha penyandang
-                    disabilitas.</small
-                  ></span
-                ></label
-              >
-              <label class="priority-option"
-                ><input type="radio" name="priority" value="2" /><span
-                  ><b>Prioritas menengah</b
-                  ><small
-                    >UMKM lokal bidang kuliner, fashion, dan produk
-                    kreatif.</small
-                  ></span
-                ></label
-              >
-              <label class="priority-option"
-                ><input type="radio" name="priority" value="3" /><span
-                  ><b>Prioritas reguler</b
-                  ><small
-                    >Usaha umum, reseller, atau usaha dari luar wilayah.</small
+                    >Misalnya memiliki surat keterangan disabilitas, penerima
+                    bantuan sosial, atau pencari nafkah tunggal. Unggah buktinya
+                    di bagian 4; tanpa bukti, klaim ini tidak dihitung.</small
                   ></span
                 ></label
               >
             </fieldset>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="step-number">3</span>
+              <div>
+                <h2>Kebutuhan ruang</h2>
+                <p>
+                  Lapak dipotong dari lorong pasar sepanjang muka yang Anda
+                  butuhkan.
+                </p>
+              </div>
+            </div>
             <div class="field-grid">
               <label
-                >Unggah KTP (opsional untuk demo)<input
-                  type="file"
-                  name="ktp"
-                  accept="image/*,.pdf"
-              /></label>
+                >Panjang muka lapak <span class="required">*</span
+                ><select name="kebutuhan_muka" required>
+                  <option value="2">2 meter (kios kecil)</option>
+                  <option value="3">3 meter (kios sedang)</option>
+                  <option value="4">4 meter (kios besar)</option>
+                  <option value="5">5 meter</option>
+                  <option value="6">6 meter (ruang pamer)</option>
+                </select></label
+              >
+              <div class="fit-preview" id="fit-preview" aria-live="polite">
+                Memeriksa ketersediaan ruang…
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="step-number">4</span>
+              <div>
+                <h2>Dokumen dan PIN</h2>
+                <p>
+                  Pengelola memeriksa dokumen sebelum Anda masuk antrean. Foto
+                  JPG/PNG atau PDF, maksimal
+                  <span data-info="maks_unggah_mb">2</span> MB.
+                </p>
+              </div>
+            </div>
+            <div class="field-grid">
               <label
-                >Unggah foto produk (opsional untuk demo)<input
-                  type="file"
-                  name="productPhoto"
-                  accept="image/*"
+                >Foto / scan KTP <span class="required">*</span
+                ><input type="file" name="ktp" required accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+              /></label>
+              <label id="khusus-wrap" hidden
+                >Bukti status khusus <span class="required">*</span
+                ><input type="file" name="dok_khusus" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" />
+                <small class="field-help">Surat keterangan disabilitas, kartu bantuan sosial, atau surat keterangan dari kelurahan.</small>
+              </label>
+              <label
+                >Buat PIN 6 angka <span class="required">*</span
+                ><input
+                  name="pin"
+                  type="password"
+                  required
+                  inputmode="numeric"
+                  pattern="[0-9]{6}"
+                  minlength="6"
+                  maxlength="6"
+                  autocomplete="new-password"
+                  placeholder="••••••"
+                />
+                <small class="field-help">Dipakai untuk konfirmasi lapak dan mencatat kios buka. Jangan beri tahu orang lain.</small>
+              </label>
+              <label
+                >Ulangi PIN <span class="required">*</span
+                ><input
+                  name="pin2"
+                  type="password"
+                  required
+                  inputmode="numeric"
+                  pattern="[0-9]{6}"
+                  minlength="6"
+                  maxlength="6"
+                  autocomplete="new-password"
+                  placeholder="••••••"
               /></label>
             </div>
-            <p class="form-note">
-              Demo frontend: berkas tidak dikirim ke server. Integrasi upload
-              membutuhkan endpoint backend.
-            </p>
           </div>
           <div class="form-actions">
             <a class="btn btn-light" href="/">Kembali</a
@@ -202,8 +266,9 @@
             </button>
           </div>
           <p class="privacy-note">
-            Dengan mengirim formulir, Anda menyatakan bahwa data yang diisi
-            benar dan dapat diverifikasi oleh pengelola.
+            Dengan mengirim formulir, Anda menyatakan data yang diisi benar.
+            Data disimpan di komputer pengelola pasar dan tidak dikirim ke
+            layanan lain.
           </p>
           <div
             id="form-message"
@@ -212,58 +277,88 @@
             aria-live="polite"
           ></div>
         </form>
+        <section class="form-card success-card" id="success-card" hidden aria-live="polite">
+          <span class="empty-icon">✓</span>
+          <h2>Pendaftaran berhasil dikirim</h2>
+          <p class="muted">Simpan kode pendaftaran berikut. Kode ini dan PIN Anda dipakai untuk semua langkah selanjutnya.</p>
+          <div class="code-box">
+            <small>KODE PENDAFTARAN</small>
+            <strong id="success-code">–</strong>
+            <button class="btn btn-light" id="copy-code" type="button">Salin kode</button>
+          </div>
+          <p id="success-detail"></p>
+          <p class="form-note">
+            Lupa kode nanti? Buka menu <a class="text-link" href="/lupa-kode">Lupa kode</a> dan masukkan NIK serta nomor telepon.
+          </p>
+          <a class="btn btn-green" id="success-link" href="/status">Lihat status pendaftaran →</a>
+        </section>
         <aside class="side-stack">
+          <section class="side-card queue-preview" id="queue-preview">
+            <span class="kicker">PERKIRAAN JALUR ANDA</span>
+            <div class="queue-preview-head">
+              <span class="queue-big q0" id="preview-badge">Q?</span>
+              <div>
+                <h2 id="preview-title">Lengkapi data usaha</h2>
+                <p class="muted small" id="preview-sub">
+                  Jalur dihitung otomatis saat Anda mengisi.
+                </p>
+              </div>
+            </div>
+            <ul class="reason-list" id="preview-reasons"></ul>
+          </section>
           <section class="side-card priority-guide">
-            <h2>Kriteria prioritas</h2>
+            <h2>Tiga jalur antrean</h2>
             <p class="muted">
-              Antrean menggunakan konsep Multi-Level Queue (MLQ).
+              Queue 1 dilayani sampai habis, baru Queue 2, lalu Queue 3.
             </p>
             <ul>
               <li>
-                <span class="dot green-dot"></span
+                <span class="dot q1-dot"></span
                 ><span
-                  ><b>Queue 1 · Tinggi</b
+                  ><b>Queue 1 · Afirmasi &amp; pelestarian</b
                   ><small
-                    >Perajin lokal dan UMKM yang memenuhi kriteria
-                    afirmasi.</small
+                    >Pengrajin lokal yang baru merintis, penyandang disabilitas,
+                    dan warga pra-sejahtera.</small
                   ></span
                 >
               </li>
               <li>
-                <span class="dot blue-dot"></span
+                <span class="dot q2-dot"></span
                 ><span
-                  ><b>Queue 2 · Menengah</b
-                  ><small>Usaha lokal reguler.</small></span
+                  ><b>Queue 2 · Pendukung ekosistem</b
+                  ><small
+                    >Kuliner, fesyen, dan usaha kreatif lokal produksi
+                    sendiri.</small
+                  ></span
                 >
               </li>
               <li>
-                <span class="dot yellow-dot"></span
+                <span class="dot q3-dot"></span
                 ><span
-                  ><b>Queue 3 · Reguler</b
-                  ><small>Usaha umum sesuai ketentuan pasar.</small></span
+                  ><b>Queue 3 · Komersial &amp; ekspansi</b
+                  ><small
+                    >Pedagang luar kota, reseller, waralaba, impor, atau usaha
+                    dengan lebih dari satu toko.</small
+                  ></span
                 >
               </li>
             </ul>
-            <div class="info-box">
-              ⓘ Pilihan ini belum menjadi keputusan final. Pengelola perlu
-              memeriksa data pendaftar.
-            </div>
           </section>
           <section class="side-card">
-            <h2>Sebelum mendaftar</h2>
+            <h2>Setelah mendaftar</h2>
             <p class="muted">
-              Siapkan identitas pemilik, nomor yang aktif, deskripsi produk, dan
-              dokumen pendukung jika tersedia.
+              Anda menerima kode pendaftaran. Simpan kodenya: kode itu dipakai
+              untuk memantau antrean, mengonfirmasi lapak dalam
+              <span data-info="timeout_hari">3</span> hari, dan mencatat kios
+              buka.
             </p>
-            <a class="text-link" href="/status"
-              >Sudah mendaftar? Cek status →</a
-            >
+            <a class="text-link" href="/status">Sudah mendaftar? Cek status →</a>
           </section>
         </aside>
       </div>
     </main>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
+      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
     </footer>
   </body>
 </html>

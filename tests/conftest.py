@@ -7,6 +7,15 @@ _tmp = tempfile.mkdtemp()
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
 os.environ["CRON_INTERVAL_DETIK"] = "0"
 os.environ["DOMISILI_PASAR"] = "Kota Contoh"
+os.environ["AUTO_SEED"] = "0"
+os.environ["TIMEOUT_HARI"] = "3"
+os.environ["PERINGATAN_HARI"] = "7"
+os.environ["PREEMPTION_HARI"] = "14"
+os.environ["MAKS_TIMEOUT"] = "3"
+os.environ["SEWA_HARI"] = "180"
+os.environ["AGING_HARI"] = "0"
+os.environ["VERIFIKASI_WAJIB"] = "0"   # tes verifikasi menyalakannya sendiri
+os.environ["UNGGAHAN_DIR"] = os.path.join(_tmp, "unggahan")
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import pytest

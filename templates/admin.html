@@ -14,257 +14,274 @@
         <span class="admin-brand-mark">ST</span>
         <span><b>SI-TAKAR</b><small>PENGELOLAAN PASAR</small></span>
       </a>
-      <p class="sidebar-label">RUANG KERJA</p>
-      <nav class="admin-nav" aria-label="Navigasi admin">
-        <a class="selected" href="/admin" aria-current="page"
-          ><span>▦</span>Ringkasan</a
-        >
-        <a href="#antrean"><span>☷</span>Antrean UMKM</a>
-        <a href="#lapak"><span>⌖</span>Denah lapak</a>
-        <a href="#aktivitas"><span>↻</span>Aktivitas sistem</a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Buka menu">☰</button>
+      <nav class="admin-nav" id="admin-nav" aria-label="Navigasi admin">
+        <p class="sidebar-label">RUANG KERJA</p>
+        <a href="/admin" data-nav="ringkasan"><span>▦</span>Ringkasan</a>
+        <a href="/admin/verifikasi" data-nav="verifikasi"
+          ><span>✓</span>Verifikasi<b class="nav-badge" id="badge-verifikasi" hidden></b
+        ></a>
+        <a href="/admin/pendaftar" data-nav="pendaftar"><span>⌕</span>Cari pendaftar</a>
+        <p class="sidebar-label">PILAR SISTEM OPERASI</p>
+        <a href="/admin/antrean" data-nav="antrean"><span>☷</span>Antrean MLQ</a>
+        <a href="/admin/denah" data-nav="denah"><span>⌖</span>Denah &amp; zona</a>
+        <a href="/admin/penyewa" data-nav="penyewa"><span>♧</span>Penyewa &amp; sewa</a>
+        <a href="/admin/deadlock" data-nav="deadlock"
+          ><span>!</span>Monitor deadlock<b class="nav-badge warn" id="badge-deadlock" hidden></b
+        ></a>
+        <a href="/admin/arsip" data-nav="arsip"><span>▤</span>Jurnal &amp; arsip</a>
       </nav>
       <div class="sidebar-bottom">
         <span class="service-dot"></span>
         <span><b>Layanan berjalan</b><small>SI-TAKAR API</small></span>
-        <a
-          href="/docs"
-          aria-label="Buka dokumentasi API"
-          title="Dokumentasi API"
-          >↗</a
-        >
+        <a href="/docs" aria-label="Buka dokumentasi API" title="Dokumentasi API">↗</a>
       </div>
     </aside>
 
     <main class="admin-main">
       <header class="admin-topbar">
         <div class="breadcrumb">
-          <span>SI-TAKAR</span><i>/</i><b>Dashboard</b>
+          <span>SI-TAKAR</span><i>/</i><b id="crumb">Ringkasan</b>
         </div>
         <div class="topbar-actions">
           <span class="today-label" id="today-label"></span>
-          <button
-            class="icon-button"
-            id="refresh-button"
-            type="button"
-            title="Muat ulang data"
-            aria-label="Muat ulang data"
-          >
-            ↻
-          </button>
-          <button
-            class="admin-avatar"
-            id="logout-button"
-            type="button"
-            title="Keluar"
-          >
-            A
-          </button>
+          <button class="icon-button" id="refresh-button" type="button" title="Muat ulang data" aria-label="Muat ulang data">↻</button>
+          <button class="btn-admin btn-ghost" id="logout-button" type="button">Keluar</button>
         </div>
       </header>
 
       <div class="dashboard-content">
         <section class="welcome-row">
           <div>
-            <span class="eyebrow-admin">PANEL PENGELOLA</span>
-            <h1>Ringkasan operasional</h1>
-            <p>
-              Pantau antrean, ketersediaan lapak, dan aktivitas pengelolaan
-              pasar.
-            </p>
+            <span class="eyebrow-admin" id="page-eyebrow">PANEL PENGELOLA</span>
+            <h1 id="page-title">Ringkasan operasional</h1>
+            <p id="page-desc"></p>
           </div>
-          <button
-            class="btn-admin btn-primary"
-            id="deadlock-button"
-            type="button"
-          >
-            <span>↻</span> Jalankan pemeriksaan
-          </button>
+          <div class="welcome-actions">
+            <button class="btn-admin btn-ghost" id="demo-button" type="button" data-show="ringkasan">Isi data contoh</button>
+            <button class="btn-admin btn-primary" id="deadlock-button" type="button" data-show="ringkasan deadlock">
+              <span>↻</span> Jalankan pemeriksaan
+            </button>
+            <a class="btn-admin btn-ghost" href="/api/admin/ekspor.csv" data-show="arsip">Unduh buku induk (CSV) ↓</a>
+          </div>
         </section>
 
-        <div
-          class="notice-bar"
-          id="dashboard-notice"
-          role="status"
-          aria-live="polite"
-          hidden
-        ></div>
+        <div class="notice-bar" id="dashboard-notice" role="status" aria-live="polite" hidden></div>
 
-        <section class="metric-grid" aria-label="Ringkasan statistik">
-          <article class="metric-card metric-applicants">
-            <div class="metric-top">
-              <span class="metric-label">TOTAL PENDAFTAR</span
-              ><span class="metric-icon">◎</span>
-            </div>
-            <strong id="metric-applicants">—</strong>
-            <span class="metric-foot"><i></i> Seluruh status pendaftaran</span>
-          </article>
-          <article class="metric-card metric-queue">
-            <div class="metric-top">
-              <span class="metric-label">DALAM ANTREAN</span
-              ><span class="metric-icon">☷</span>
-            </div>
-            <strong id="metric-queue">—</strong>
-            <span class="metric-foot">Menunggu alokasi lapak</span>
-          </article>
-          <article class="metric-card metric-stalls">
-            <div class="metric-top">
-              <span class="metric-label">LAPAK TERSEDIA</span
-              ><span class="metric-icon">⌖</span>
-            </div>
-            <strong id="metric-empty">—</strong>
-            <span class="metric-foot"
-              ><span id="metric-occupancy">—</span> tingkat keterisian</span
-            >
-          </article>
-          <article class="metric-card metric-alerts">
-            <div class="metric-top">
-              <span class="metric-label">CATATAN PELANGGARAN</span
-              ><span class="metric-icon">!</span>
-            </div>
-            <strong id="metric-violations">—</strong>
-            <span class="metric-foot">Terekam dalam sistem</span>
-          </article>
+        <section class="clock-bar" aria-label="Jam sistem" data-show="ringkasan deadlock">
+          <div>
+            <span class="section-index">JAM SISTEM</span>
+            <b id="clock-now">–</b>
+            <small id="clock-shift">Mengikuti jam laptop</small>
+          </div>
+          <div class="clock-actions">
+            <span>Majukan untuk demo:</span>
+            <button class="btn-admin btn-ghost" data-advance="1" type="button">+1 hari</button>
+            <button class="btn-admin btn-ghost" data-advance="3" type="button">+3 hari</button>
+            <button class="btn-admin btn-ghost" data-advance="7" type="button">+7 hari</button>
+            <button class="btn-admin btn-ghost" data-advance="14" type="button">+14 hari</button>
+            <button class="text-action" id="clock-reset" type="button">Kembalikan</button>
+          </div>
         </section>
 
-        <section class="overview-grid">
-          <article class="panel queue-panel" id="antrean">
-            <div class="panel-heading">
-              <div>
-                <span class="section-index">01 / PRIORITAS</span>
-                <h2>Antrean pendaftar</h2>
+        <!-- ================= RINGKASAN ================= -->
+        <div data-page="ringkasan" hidden>
+          <section class="metric-grid" aria-label="Ringkasan statistik">
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">TOTAL PENDAFTAR</span><span class="metric-icon">◎</span></div>
+              <strong id="metric-applicants">—</strong>
+              <span class="metric-foot"><i></i> <span id="metric-active">—</span> penyewa aktif</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">DALAM ANTREAN</span><span class="metric-icon">☷</span></div>
+              <strong id="metric-queue">—</strong>
+              <span class="metric-foot" id="metric-queue-split">Q1 — · Q2 — · Q3 —</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">RUANG KOSONG</span><span class="metric-icon">⌖</span></div>
+              <strong id="metric-empty">—</strong>
+              <span class="metric-foot"><span id="metric-occupancy">—</span> tingkat keterisian</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">TIMEOUT &amp; PREEMPTION</span><span class="metric-icon">!</span></div>
+              <strong id="metric-violations">—</strong>
+              <span class="metric-foot">Lapak tertahan yang dilepas sistem</span>
+            </article>
+          </section>
+          <section class="overview-grid">
+            <article class="panel">
+              <div class="panel-heading">
+                <div><span class="section-index">PERLU TINDAKAN</span><h2>Yang menunggu pengelola</h2></div>
               </div>
-              <span class="live-label"><i></i> LIVE</span>
+              <div class="todo-list" id="todo-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <div><span class="section-index">TERBARU</span><h2>Kejadian sistem</h2></div>
+                <a class="text-action" href="/admin/arsip">Lihat semua →</a>
+              </div>
+              <div class="journal short" id="recent-journal"><p class="table-message">Memuat...</p></div>
+            </article>
+          </section>
+        </div>
+
+        <!-- ================= VERIFIKASI ================= -->
+        <div data-page="verifikasi" hidden>
+          <div class="verify-list" id="verify-list"><p class="table-message">Memuat...</p></div>
+        </div>
+
+        <!-- ================= CARI PENDAFTAR ================= -->
+        <div data-page="pendaftar" hidden>
+          <section class="panel">
+            <form class="search-bar" id="search-form">
+              <input id="search-q" placeholder="Nama usaha / pemilik, NIK, kode STK-…, atau nomor HP" autocomplete="off" />
+              <select id="search-status">
+                <option value="">Semua status</option>
+                <option>Menunggu Verifikasi</option>
+                <option>Menunggu</option>
+                <option>Menunggu Konfirmasi</option>
+                <option>Aktif</option>
+                <option>Dicabut</option>
+                <option>Gugur</option>
+                <option>Selesai</option>
+                <option>Lulus Inkubasi</option>
+                <option>Ditolak</option>
+              </select>
+              <button class="btn-admin btn-primary" type="submit">Cari</button>
+            </form>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>KODE</th><th>USAHA</th><th>NIK</th><th>QUEUE</th><th>STATUS</th><th>DAFTAR</th></tr></thead>
+                <tbody id="search-body"><tr><td colspan="6" class="table-message">Memuat...</td></tr></tbody>
+              </table>
             </div>
+            <p class="panel-foot" id="search-foot">Klik baris untuk melihat detail, dokumen, dan mengatur ulang PIN</p>
+          </section>
+        </div>
+
+        <!-- ================= ANTREAN ================= -->
+        <div data-page="antrean" hidden>
+          <article class="panel queue-panel">
             <div class="queue-tabs" role="tablist" aria-label="Filter antrean">
-              <button
-                class="queue-tab active"
-                type="button"
-                data-queue-filter="all"
-                aria-pressed="true"
-              >
-                Semua <b id="tab-all">0</b>
-              </button>
-              <button
-                class="queue-tab"
-                type="button"
-                data-queue-filter="1"
-                aria-pressed="false"
-              >
-                Q1 <b id="tab-q1">0</b>
-              </button>
-              <button
-                class="queue-tab"
-                type="button"
-                data-queue-filter="2"
-                aria-pressed="false"
-              >
-                Q2 <b id="tab-q2">0</b>
-              </button>
-              <button
-                class="queue-tab"
-                type="button"
-                data-queue-filter="3"
-                aria-pressed="false"
-              >
-                Q3 <b id="tab-q3">0</b>
-              </button>
+              <button class="queue-tab active" type="button" data-queue-filter="all" aria-pressed="true">Semua <b id="tab-all">0</b></button>
+              <button class="queue-tab" type="button" data-queue-filter="1" aria-pressed="false">Q1 <b id="tab-q1">0</b></button>
+              <button class="queue-tab" type="button" data-queue-filter="2" aria-pressed="false">Q2 <b id="tab-q2">0</b></button>
+              <button class="queue-tab" type="button" data-queue-filter="3" aria-pressed="false">Q3 <b id="tab-q3">0</b></button>
             </div>
             <div class="table-scroll">
               <table>
-                <thead>
-                  <tr>
-                    <th>USAHA</th>
-                    <th>PEMILIK</th>
-                    <th>QUEUE</th>
-                    <th>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody id="queue-table-body">
-                  <tr>
-                    <td colspan="4" class="table-message">Memuat antrean...</td>
-                  </tr>
-                </tbody>
+                <thead><tr><th>GILIRAN</th><th>USAHA</th><th>QUEUE</th><th>BUTUH</th><th>ALASAN JALUR</th></tr></thead>
+                <tbody id="queue-table-body"><tr><td colspan="5" class="table-message">Memuat antrean...</td></tr></tbody>
               </table>
             </div>
-            <p class="panel-foot" id="queue-foot">
-              Prioritas MLQ · urut berdasarkan waktu pendaftaran
+            <p class="panel-foot" id="queue-foot"></p>
+          </article>
+        </div>
+
+        <!-- ================= DENAH ================= -->
+        <div data-page="denah" hidden>
+          <section class="panel map-panel">
+            <div class="stall-summary">
+              <div><i class="legend-dot empty-dot"></i><span>Ruang kosong</span><b id="stall-empty">—</b></div>
+              <div><i class="legend-dot reserved-dot"></i><span>Dipesan</span><b id="stall-reserved">—</b></div>
+              <div><i class="legend-dot occupied-dot"></i><span>Terisi</span><b id="stall-occupied">—</b></div>
+              <div><i class="legend-dot frag-dot"></i><span>Kosong terluas</span><b id="frag-largest">—</b></div>
+              <div><i class="legend-dot frag-dot"></i><span>Fragmentasi</span><b id="frag-percent">—</b></div>
+            </div>
+            <div class="zone-strips" id="stall-map" aria-label="Peta ruang per zona"></div>
+            <p class="panel-hint">
+              Setiap baris adalah satu lorong. Lapak dipotong dari ruang kosong terluas mulai dari ujung kirinya.
+              Ruang yang dilepas menyatu kembali dengan ruang kosong di sebelahnya. Fragmentasi 0% berarti seluruh
+              ruang kosong masih bersambung.
             </p>
-          </article>
+            <div class="tool-grid">
+              <form class="tool-card" id="sim-form">
+                <b>Simulator penempatan</b>
+                <p>Bandingkan tiga strategi untuk satu permintaan tanpa mengubah data.</p>
+                <div class="tool-row">
+                  <label>Kebutuhan muka (m)<input id="sim-need" type="number" min="1" max="20" step="1" value="3" /></label>
+                  <button class="btn-admin btn-primary" type="submit">Bandingkan</button>
+                </div>
+                <div class="sim-result" id="sim-result"></div>
+              </form>
+              <form class="tool-card" id="zone-form">
+                <b>Tambah zona</b>
+                <p>Lorong baru langsung menjadi ruang kosong dan ditawarkan ke antrean.</p>
+                <div class="tool-row">
+                  <label>Kode<input name="kode" maxlength="4" required placeholder="D" /></label>
+                  <label class="grow">Nama<input name="nama" maxlength="60" required placeholder="Lorong Baru" /></label>
+                  <label>Panjang (m)<input name="panjang" type="number" min="1" max="200" step="1" required value="12" /></label>
+                  <label>Kedalaman (m)<input name="kedalaman" type="number" min="1" max="20" step="0.5" required value="3" /></label>
+                  <button class="btn-admin btn-ghost" type="submit">Tambah</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
 
-          <article class="panel occupancy-panel" id="lapak">
+        <!-- ================= PENYEWA ================= -->
+        <div data-page="penyewa" hidden>
+          <section class="panel">
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>LAPAK</th><th>USAHA</th><th>QUEUE</th><th>STATUS</th><th>TIMER</th><th>MASA SEWA</th><th>TINDAKAN</th></tr></thead>
+                <tbody id="tenant-table-body"><tr><td colspan="7" class="table-message">Memuat penyewa...</td></tr></tbody>
+              </table>
+            </div>
+            <p class="panel-foot" id="tenant-foot"></p>
+          </section>
+        </div>
+
+        <!-- ================= DEADLOCK ================= -->
+        <div data-page="deadlock" hidden>
+          <section class="rule-grid" id="rule-grid"></section>
+          <section class="panel activity-panel">
             <div class="panel-heading">
-              <div>
-                <span class="section-index">02 / DENAH</span>
-                <h2>Status lapak</h2>
-              </div>
-              <a
-                class="text-action"
-                href="/docs#/Peta%20Denah%20Pasar/peta_lapak_peta__get"
-                >API denah ↗</a
-              >
+              <div><span class="section-index">RIWAYAT</span><h2>Lapak tertahan yang dilepas sistem</h2></div>
             </div>
-            <div class="stall-summary" id="stall-summary">
-              <div>
-                <i class="legend-dot empty-dot"></i><span>Kosong</span
-                ><b id="stall-empty">—</b>
-              </div>
-              <div>
-                <i class="legend-dot reserved-dot"></i><span>Dipesan</span
-                ><b id="stall-reserved">—</b>
-              </div>
-              <div>
-                <i class="legend-dot occupied-dot"></i><span>Terisi</span
-                ><b id="stall-occupied">—</b>
-              </div>
+            <div class="activity-table-wrap">
+              <table>
+                <thead><tr><th>WAKTU</th><th>USAHA</th><th>JENIS</th><th>CATATAN</th></tr></thead>
+                <tbody id="activity-table-body"><tr><td colspan="4" class="table-message">Memuat...</td></tr></tbody>
+              </table>
             </div>
-            <div
-              class="stall-map"
-              id="stall-map"
-              aria-label="Peta status lapak"
-            ></div>
-            <div class="map-footer">
-              <span><i class="legend-dot empty-dot"></i> Tersedia</span
-              ><span
-                ><i class="legend-dot reserved-dot"></i> Menunggu
-                konfirmasi</span
-              ><span><i class="legend-dot occupied-dot"></i> Aktif</span>
-            </div>
-          </article>
-        </section>
+          </section>
+        </div>
 
-        <section class="panel activity-panel" id="aktivitas">
-          <div class="panel-heading">
-            <div>
-              <span class="section-index">03 / AUDIT</span>
-              <h2>Aktivitas sistem</h2>
-            </div>
-            <button class="text-action" id="activity-refresh" type="button">
-              Perbarui ↻
-            </button>
-          </div>
-          <div class="activity-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>WAKTU</th>
-                  <th>USAHA</th>
-                  <th>JENIS</th>
-                  <th>CATATAN</th>
-                </tr>
-              </thead>
-              <tbody id="activity-table-body">
-                <tr>
-                  <td colspan="4" class="table-message">Memuat aktivitas...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <!-- ================= ARSIP ================= -->
+        <div data-page="arsip" hidden>
+          <section class="overview-grid">
+            <article class="panel">
+              <div class="panel-heading"><div><span class="section-index">JURNAL</span><h2>Semua kejadian sistem</h2></div></div>
+              <div class="journal" id="journal-list"><p class="table-message">Memuat jurnal...</p></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading"><div><span class="section-index">ARSIP</span><h2>UMKM yang sudah keluar</h2></div></div>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>USAHA</th><th>STATUS AKHIR</th><th>LAPAK TERAKHIR</th><th>PELANGGARAN</th></tr></thead>
+                  <tbody id="archive-table-body"><tr><td colspan="4" class="table-message">Memuat arsip...</td></tr></tbody>
+                </table>
+              </div>
+              <p class="panel-foot">Data UMKM yang sudah keluar dari pasar tidak dihapus, hanya dipindahkan ke arsip</p>
+            </article>
+          </section>
+        </div>
+
         <footer class="admin-footer">
-          <span>SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota</span
-          ><span id="last-updated">Menunggu sinkronisasi</span>
+          <span>SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</span><span id="last-updated">Menunggu sinkronisasi</span>
         </footer>
       </div>
     </main>
+
+    <!-- Panel detail pendaftar (dipakai halaman Cari pendaftar) -->
+    <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+    <aside class="drawer" id="drawer" aria-label="Detail pendaftar" hidden>
+      <div class="drawer-head">
+        <div><span class="section-index" id="drawer-kode">–</span><h2 id="drawer-title">–</h2></div>
+        <button class="icon-button" id="drawer-close" type="button" aria-label="Tutup">×</button>
+      </div>
+      <div class="drawer-body" id="drawer-body"></div>
+    </aside>
   </body>
 </html>

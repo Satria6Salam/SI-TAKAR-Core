@@ -1,63 +1,137 @@
-"""Alokasi lapak dengan Worst-Fit + pemanggilan antrean MLQ.
+"""Manajemen Memori: alokasi lapak dengan partisi dinamis + Worst-Fit.
 
-Worst-Fit: dari semua lapak berstatus KOSONG, pilih yang luasnya PALING BESAR.
-Antrean MLQ: Queue 1 dihabiskan dulu, lalu Queue 2, lalu Queue 3;
-di dalam satu queue urut berdasarkan waktu_daftar (FIFO).
+Analogi dengan memori:
+  zona            = blok memori (lorong pasar sepanjang N meter)
+  lapak           = partisi yang dipotong dari zona saat ada permintaan
+  hole            = ruang kosong bersambung di antara lapak (dihitung, tidak disimpan)
+  kebutuhan_muka  = ukuran permintaan (panjang muka lapak, meter)
+
+Worst-Fit: dari semua hole yang cukup, ambil yang PALING LUAS, lalu potong dari ujung
+awalnya. Sisa potongannya tetap besar sehingga masih layak disewa orang lain (tidak menjadi
+celah tanggung). Saat lapak dilepas, ruangnya otomatis menyatu dengan hole di sebelahnya
+(coalescing) karena hole selalu dihitung ulang dari lapak yang masih menempati.
+
+First-Fit dan Best-Fit ikut disediakan hanya sebagai pembanding di simulator.
 """
-from datetime import timedelta
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from database.config import TIMEOUT_HARI, utcnow
-from database.models import (AlokasiSewa, Lapak, StatusAlokasi, StatusLapak,
-                             StatusPendaftaran, UMKM)
+from database.models import Lapak, StatusLapak, Zona
+
+EPS = 1e-6
+STRATEGI = ("worst", "best", "first")
 
 
-def cari_lapak_worst_fit(db: Session, min_luas: float = 0.0) -> Lapak | None:
-    """Lapak KOSONG dengan luas terbesar (minimal min_luas). None jika tidak ada."""
-    return (
-        db.query(Lapak)
-        .filter(Lapak.status_lapak == StatusLapak.KOSONG, Lapak.luas >= min_luas)
-        .order_by(Lapak.luas.desc(), Lapak.id.asc())
-        .first()
-    )
+@dataclass(frozen=True)
+class Hole:
+    zona_id: int
+    zona_kode: str
+    mulai: float
+    panjang: float
+    kedalaman: float
+
+    @property
+    def luas(self) -> float:
+        return round(self.panjang * self.kedalaman, 2)
 
 
-def antrean_menunggu(db: Session, exclude_ids=()):
-    """Pendaftar yang masih mengantre, terurut Queue 1 -> 2 -> 3, lalu waktu_daftar."""
-    q = db.query(UMKM).filter(UMKM.status_pendaftaran == StatusPendaftaran.MENUNGGU)
-    if exclude_ids:
-        q = q.filter(UMKM.id.notin_(list(exclude_ids)))
-    return q.order_by(UMKM.queue_level.asc(), UMKM.waktu_daftar.asc(), UMKM.id.asc())
+def lapak_menempati(db: Session) -> list[Lapak]:
+    """Lapak yang masih memakai ruang (Dipesan/Terisi), urut posisi."""
+    return (db.query(Lapak)
+            .filter(Lapak.status_lapak.in_(StatusLapak.MENEMPATI))
+            .order_by(Lapak.zona_id, Lapak.mulai).all())
 
 
-def jalankan_alokasi(db: Session, now=None, exclude_umkm_ids=()) -> list[AlokasiSewa]:
-    """Selama ada lapak kosong DAN ada yang mengantre: pasangkan (Worst-Fit).
+def hole_zona(zona: Zona, lapak_zona: list[Lapak]) -> list[Hole]:
+    """Ruang kosong di satu zona = celah di antara lapak yang menempati."""
+    holes, kursor = [], 0.0
+    for l in sorted(lapak_zona, key=lambda x: x.mulai):
+        if l.mulai - kursor > EPS:
+            holes.append(Hole(zona.id, zona.kode, round(kursor, 2), round(l.mulai - kursor, 2),
+                              zona.kedalaman))
+        kursor = max(kursor, l.mulai + l.panjang)
+    if zona.panjang - kursor > EPS:
+        holes.append(Hole(zona.id, zona.kode, round(kursor, 2), round(zona.panjang - kursor, 2),
+                          zona.kedalaman))
+    return holes
 
-    Lapak berubah jadi 'Dipesan' dan timer Timeout (batas_konfirmasi) mulai berjalan.
-    """
-    now = now or utcnow()
-    hasil: list[AlokasiSewa] = []
-    while True:
-        umkm = antrean_menunggu(db, exclude_umkm_ids).first()
-        if umkm is None:
-            break
-        lapak = cari_lapak_worst_fit(db)
-        if lapak is None:
-            break
 
-        alokasi = AlokasiSewa(
-            umkm_id=umkm.id,
-            lapak_id=lapak.id,
-            waktu_alokasi=now,
-            batas_konfirmasi=now + timedelta(days=TIMEOUT_HARI),
-            status_alokasi=StatusAlokasi.MENUNGGU,
-        )
-        lapak.status_lapak = StatusLapak.DIPESAN
-        umkm.status_pendaftaran = StatusPendaftaran.MENUNGGU_KONFIRMASI
-        db.add(alokasi)
-        db.flush()  # supaya query berikutnya melihat perubahan status
-        hasil.append(alokasi)
+def daftar_hole(db: Session) -> list[Hole]:
+    per_zona: dict[int, list[Lapak]] = {}
+    for l in lapak_menempati(db):
+        per_zona.setdefault(l.zona_id, []).append(l)
+    holes: list[Hole] = []
+    for zona in db.query(Zona).order_by(Zona.kode).all():
+        holes.extend(hole_zona(zona, per_zona.get(zona.id, [])))
+    return holes
 
-    db.commit()
+
+def pilih_hole(holes: list[Hole], kebutuhan: float, strategi: str = "worst") -> Hole | None:
+    """Pilih hole untuk permintaan sepanjang `kebutuhan` meter. None jika tidak ada yang muat."""
+    kandidat = [h for h in holes if h.panjang + EPS >= kebutuhan]
+    if not kandidat:
+        return None
+    urut_posisi = lambda h: (h.zona_kode, h.mulai)  # noqa: E731
+    if strategi == "worst":
+        return min(kandidat, key=lambda h: (-h.luas, *urut_posisi(h)))
+    if strategi == "best":
+        return min(kandidat, key=lambda h: (h.luas, *urut_posisi(h)))
+    if strategi == "first":
+        return min(kandidat, key=urut_posisi)
+    raise ValueError(f"Strategi tidak dikenal: {strategi}")
+
+
+def potong(holes: list[Hole], hole: Hole, kebutuhan: float) -> list[Hole]:
+    """Daftar hole setelah `kebutuhan` meter dipotong dari ujung awal `hole`."""
+    hasil = []
+    for h in holes:
+        if h != hole:
+            hasil.append(h)
+        elif h.panjang - kebutuhan > EPS:
+            hasil.append(Hole(h.zona_id, h.zona_kode, round(h.mulai + kebutuhan, 2),
+                              round(h.panjang - kebutuhan, 2), h.kedalaman))
     return hasil
+
+
+def statistik(holes: list[Hole]) -> dict:
+    """Ukuran fragmentasi eksternal: seberapa terpecah ruang kosong yang tersisa."""
+    total = round(sum(h.panjang for h in holes), 2)
+    terbesar = max((h.panjang for h in holes), default=0.0)
+    return {
+        "jumlah_hole": len(holes),
+        "total_kosong_m": total,
+        "hole_terbesar_m": terbesar,
+        "hole_terkecil_m": min((h.panjang for h in holes), default=0.0),
+        # 0% = semua ruang kosong menyatu; makin besar = makin terpecah
+        "fragmentasi_persen": round((1 - terbesar / total) * 100, 1) if total > EPS else 0.0,
+    }
+
+
+def simulasi(holes: list[Hole], kebutuhan: float) -> dict:
+    """Bandingkan Worst-Fit, Best-Fit, First-Fit untuk satu permintaan (tanpa mengubah data)."""
+    hasil = {}
+    for s in STRATEGI:
+        h = pilih_hole(holes, kebutuhan, s)
+        if h is None:
+            hasil[s] = None
+            continue
+        hasil[s] = {
+            "zona": h.zona_kode, "mulai": h.mulai, "hole_panjang_m": h.panjang,
+            "sisa_potongan_m": round(h.panjang - kebutuhan, 2),
+            "setelah": statistik(potong(holes, h, kebutuhan)),
+        }
+    return hasil
+
+
+def buat_lapak(db: Session, hole: Hole, kebutuhan: float) -> Lapak:
+    """Potong lapak baru dari ujung awal hole (status Dipesan)."""
+    nomor = db.query(Lapak).filter(Lapak.zona_id == hole.zona_id).count() + 1
+    lapak = Lapak(
+        zona_id=hole.zona_id, kode_lapak=f"{hole.zona_kode}-{nomor:02d}",
+        mulai=hole.mulai, panjang=kebutuhan, lebar=hole.kedalaman,
+        luas=round(kebutuhan * hole.kedalaman, 2), status_lapak=StatusLapak.DIPESAN,
+    )
+    db.add(lapak)
+    db.flush()
+    return lapak
