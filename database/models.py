@@ -153,6 +153,7 @@ class AlokasiSewa(Base):
     batas_konfirmasi = Column(DateTime)             # timer Timeout
     terakhir_aktif = Column(DateTime)               # timer Preemption
     peringatan_dikirim = Column(Boolean, default=False)
+    terakhir_absen = Column(DateTime)              # tombol "Buka kios hari ini" / inspeksi admin
     sewa_mulai = Column(DateTime)                   # siklus sewa
     sewa_berakhir = Column(DateTime)
     waktu_selesai = Column(DateTime)                # kapan alokasi ini berakhir (apa pun sebabnya)

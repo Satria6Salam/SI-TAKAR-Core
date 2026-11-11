@@ -161,21 +161,28 @@
 
         <!-- ================= ANTREAN ================= -->
         <div data-page="antrean" hidden>
-          <article class="panel queue-panel">
-            <div class="queue-tabs" role="tablist" aria-label="Filter antrean">
-              <button class="queue-tab active" type="button" data-queue-filter="all" aria-pressed="true">Semua <b id="tab-all">0</b></button>
-              <button class="queue-tab" type="button" data-queue-filter="1" aria-pressed="false">Q1 <b id="tab-q1">0</b></button>
-              <button class="queue-tab" type="button" data-queue-filter="2" aria-pressed="false">Q2 <b id="tab-q2">0</b></button>
-              <button class="queue-tab" type="button" data-queue-filter="3" aria-pressed="false">Q3 <b id="tab-q3">0</b></button>
+          <section class="dispatch-bar">
+            <div class="dispatch-flow" aria-label="Urutan pelayanan">
+              <span class="flow-step q1">Queue 1<b id="lane-count-1">0</b></span><i>→</i>
+              <span class="flow-step q2">Queue 2<b id="lane-count-2">0</b></span><i>→</i>
+              <span class="flow-step q3">Queue 3<b id="lane-count-3">0</b></span><i>→</i>
+              <span class="flow-step cpu">Worst-Fit<b>⌖</b></span>
             </div>
-            <div class="table-scroll">
-              <table>
-                <thead><tr><th>GILIRAN</th><th>USAHA</th><th>QUEUE</th><th>BUTUH</th><th>ALASAN JALUR</th></tr></thead>
-                <tbody id="queue-table-body"><tr><td colspan="5" class="table-message">Memuat antrean...</td></tr></tbody>
-              </table>
+            <div class="dispatch-action">
+              <p id="dispatch-summary">Memuat rencana putaran…</p>
+              <button class="btn-admin btn-primary" id="round-button" type="button"><span>▶</span> Jalankan putaran alokasi</button>
             </div>
-            <p class="panel-foot" id="queue-foot"></p>
-          </article>
+          </section>
+          <section class="lanes" id="lanes">
+            <article class="lane q1"><header><b>Queue 1</b><span>Afirmasi &amp; pelestarian · dilayani pertama</span></header><ol id="lane-1"></ol></article>
+            <article class="lane q2"><header><b>Queue 2</b><span>Pendukung ekosistem · setelah Q1 habis</span></header><ol id="lane-2"></ol></article>
+            <article class="lane q3"><header><b>Queue 3</b><span>Komersial &amp; ekspansi · mengisi sisa ruang</span></header><ol id="lane-3"></ol></article>
+          </section>
+          <p class="panel-hint lanes-hint" id="lanes-hint">
+            Angka # adalah urutan giliran pada putaran berikutnya. Label hijau menunjukkan ruang yang akan
+            dipotong untuk pendaftar itu; label abu-abu berarti belum ada ruang bersambung yang muat sehingga
+            ia tetap di posisinya dan giliran diteruskan ke pendaftar berikutnya.
+          </p>
         </div>
 
         <!-- ================= DENAH ================= -->

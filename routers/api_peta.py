@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from algoritma.penjadwal import jalankan_alokasi
+from algoritma.penjadwal import alokasi_otomatis
 from algoritma.worst_fit import daftar_hole, hole_zona, lapak_menempati, simulasi, statistik
 from database.config import get_db
 from database.models import AlokasiSewa, StatusAlokasi, StatusLapak, Zona, catat
@@ -85,6 +85,6 @@ def tambah_zona(data: ZonaCreate, db: Session = Depends(get_db), _admin=Depends(
     db.add(z)
     catat(db, "Zona Baru", f"Zona {kode} ({data.panjang:g} m x {data.kedalaman:g} m) ditambahkan.")
     db.commit()
-    baru = jalankan_alokasi(db)
+    baru = alokasi_otomatis(db)
     return {"id": z.id, "kode": z.kode, "panjang": z.panjang, "kedalaman": z.kedalaman,
             "alokasi_baru": len(baru)}

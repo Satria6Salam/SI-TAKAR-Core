@@ -3,78 +3,74 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#173e31" />
+    <meta name="theme-color" content="#0a3f3c" />
     <title>Login Admin | SI-TAKAR</title>
-    <link rel="stylesheet" href="/static/css/admin.css" />
+    <link rel="stylesheet" href="/static/css/login.css" />
     <script src="/static/js/admin-login.js" defer></script>
   </head>
   <body class="login-page">
+    <div class="login-scene" aria-hidden="true">
+      <span class="orb o1"><img src="/static/img/hoop-kain.webp" alt="" /></span>
+      <span class="orb o2"><img src="/static/img/anyaman-dinding.webp" alt="" /></span>
+      <span class="orb o3"><img src="/static/img/sulaman-motif.webp" alt="" /></span>
+      <span class="orb o4"><img src="/static/img/anyaman-gantung.webp" alt="" /></span>
+      <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span>
+      <span class="ring-deco"></span>
+    </div>
+
     <main class="login-layout">
       <section class="login-intro">
-        <a
-          class="admin-brand"
-          href="/"
-          aria-label="Kembali ke beranda SI-TAKAR"
-        >
-          <span class="admin-brand-mark">ST</span>
-          <span><b>SI-TAKAR</b><small>PENGELOLAAN PASAR</small></span>
+        <a class="login-brand" href="/" aria-label="Kembali ke beranda SI-TAKAR">
+          <span class="brand-mark"></span>
+          <span><b>Si-Takar</b><small>PENGELOLAAN PASAR SENI</small></span>
         </a>
-        <div class="login-intro-copy">
-          <span class="eyebrow-admin">RUANG PENGELOLA</span>
-          <h1>Kelola pasar dengan data yang selalu terhubung.</h1>
+        <div class="intro-copy">
+          <span class="eyebrow"><i></i> RUANG PENGELOLA</span>
+          <h1>Kelola pasar dengan <span class="script">adil &amp; tertata</span></h1>
           <p>
-            Masuk untuk memantau antrean UMKM, status lapak, dan aktivitas
-            sistem.
+            Verifikasi pendaftar, jalankan putaran antrean Multilevel Queue,
+            pantau denah ruang, dan lepaskan lapak yang tertahan dari satu
+            tempat.
           </p>
+          <ul class="pillars">
+            <li><b>☷</b>Antrean MLQ</li>
+            <li><b>⌖</b>Worst-Fit</li>
+            <li><b>▤</b>Arsip &amp; jurnal</li>
+            <li><b>!</b>Anti-deadlock</li>
+          </ul>
         </div>
         <a class="login-back" href="/">← Kembali ke halaman utama</a>
       </section>
+
       <section class="login-form-side">
-        <form class="login-form" id="admin-login-form">
-          <span class="section-index">AKSES ADMIN</span>
-          <h2>Selamat datang</h2>
-          <p class="login-description">
-            Masukkan akun pengelola untuk melanjutkan.
-          </p>
-          <label for="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            autocomplete="username"
-            required
-            value="admin"
-          />
-          <label for="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            placeholder="Masukkan password"
-          />
-          <p
-            class="login-error"
-            id="login-error"
-            role="alert"
-            aria-live="polite"
-          ></p>
-          <button class="btn-admin btn-primary login-submit" type="submit">
-            Masuk ke dashboard <span>→</span>
-          </button>
+        <form class="login-card" id="admin-login-form" autocomplete="on">
+          <span class="card-icon" aria-hidden="true"><img src="/static/img/pembatik.webp" alt="" /></span>
+          <span class="kicker">AKSES ADMIN</span>
+          <h2>Selamat datang kembali</h2>
+          <p class="login-description">Masukkan akun pengelola untuk melanjutkan.</p>
+
+          <label class="field" for="username">
+            <span>Username</span>
+            <span class="input-wrap"><i aria-hidden="true">👤</i
+              ><input id="username" name="username" autocomplete="username" required value="admin"
+            /></span>
+          </label>
+          <label class="field" for="password">
+            <span>Password</span>
+            <span class="input-wrap"><i aria-hidden="true">🔒</i
+              ><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Masukkan password"
+              /><button class="peek" id="peek" type="button" aria-label="Tampilkan password" aria-pressed="false">Lihat</button></span>
+          </label>
+
+          <p class="login-error" id="login-error" role="alert" aria-live="polite"></p>
+          <button class="login-submit" type="submit">Masuk ke dashboard <span>→</span></button>
+
           <aside class="demo-credentials">
-            <b>Kredensial demonstrasi</b>
-            <span>Username <code>admin</code></span>
-            <span>Password <code>admin123</code></span>
-            <small
-              >Untuk demo lokal saja. Ganti kredensial sebelum deployment
-              publik.</small
-            >
+            <b>Akun demo laptop</b>
+            <span>Username <code>admin</code> · Password <code>admin123</code></span>
           </aside>
         </form>
-        <footer class="login-footer">
-          SI-TAKAR · Sistem Tata Kelola Pasar Seni Kota
-        </footer>
+        <footer class="login-footer">SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</footer>
       </section>
     </main>
   </body>

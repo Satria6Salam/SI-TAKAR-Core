@@ -13,7 +13,7 @@
     pendaftar: ["DATA PENDAFTAR", "Cari pendaftar",
       "Cari pemilik yang lupa kode, lihat dokumen dan riwayatnya, atau atur ulang PIN setelah mencocokkan KTP asli."],
     antrean: ["PILAR 1 · MANAJEMEN PROSES", "Antrean Multilevel Queue",
-      "Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Di dalam satu queue berlaku siapa lebih dulu mendaftar."],
+      "Lapak dibagikan per putaran: dalam satu putaran Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Di dalam satu queue berlaku siapa lebih dulu mendaftar."],
     denah: ["PILAR 2 · MANAJEMEN MEMORI", "Denah pasar dan ruang kosong",
       "Lapak dipotong dari ruang kosong terluas (Worst-Fit) sepanjang kebutuhan pendaftar."],
     penyewa: ["PILAR 3 · SIKLUS SEWA", "Penyewa dan masa sewa",
@@ -59,6 +59,24 @@
     }).format(date);
   };
   const meter = (n) => `${Number(n).toLocaleString("id-ID")} m`;
+  // angka kartu metrik menghitung naik (dimatikan bila pengguna memilih kurangi gerakan)
+  const kurangiGerak = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function hitungNaik(el, nilai, akhiran = "") {
+    const tujuan = Number(nilai) || 0;
+    const awal = Number(el.dataset.nilai || 0);
+    el.dataset.nilai = tujuan;
+    if (kurangiGerak || awal === tujuan) {
+      el.textContent = tujuan.toLocaleString("id-ID") + akhiran;
+      return;
+    }
+    const mulai = performance.now();
+    const langkah = (t) => {
+      const p = Math.min(1, (t - mulai) / 800);
+      el.textContent = Math.round(awal + (tujuan - awal) * (1 - Math.pow(1 - p, 3))).toLocaleString("id-ID") + akhiran;
+      if (p < 1) requestAnimationFrame(langkah);
+    };
+    requestAnimationFrame(langkah);
+  }
   const setNotice = (text, type = "info") => {
     notice.textContent = text;
     notice.className = `notice-bar ${type}`;
@@ -116,19 +134,19 @@
       loadBadges(), api("/antrean"), api("/peta"), api("/alokasi/log"), api("/api/admin/aktivitas?limit=10"),
     ]);
     const perQ = [1, 2, 3].map((l) => (queues[`queue_${l}`] || []).length);
-    byId("metric-applicants").textContent = summary.total;
+    hitungNaik(byId("metric-applicants"), summary.total);
     byId("metric-active").textContent = summary.status.Aktif || 0;
-    byId("metric-queue").textContent = perQ[0] + perQ[1] + perQ[2];
+    hitungNaik(byId("metric-queue"), perQ[0] + perQ[1] + perQ[2]);
     byId("metric-queue-split").textContent = `Q1 ${perQ[0]} · Q2 ${perQ[1]} · Q3 ${perQ[2]}`;
-    byId("metric-empty").textContent = meter(peta.ringkasan.kosong_m);
+    hitungNaik(byId("metric-empty"), peta.ringkasan.kosong_m, " m");
     byId("metric-occupancy").textContent = `${peta.ringkasan.keterisian_persen}%`;
-    byId("metric-violations").textContent = violations.length;
+    hitungNaik(byId("metric-violations"), violations.length);
 
     const tugas = [
       [summary.menunggu_verifikasi, "pendaftar menunggu verifikasi dokumen", "/admin/verifikasi", "Periksa"],
       [summary.menunggu_konfirmasi, "lapak menunggu konfirmasi penjual (timer Timeout berjalan)", "/admin/penyewa", "Lihat"],
       [summary.penyewa_peringatan, `penyewa sudah tutup ≥ ${info.peringatan_hari} hari (berisiko Preemption)`, "/admin/penyewa", "Inspeksi"],
-      [perQ[0] + perQ[1] + perQ[2], "pendaftar mengantre karena belum ada ruang yang muat", "/admin/denah", "Lihat denah"],
+      [perQ[0] + perQ[1] + perQ[2], "pendaftar terverifikasi menunggu putaran alokasi (Q1 → Q2 → Q3)", "/admin/antrean", "Jalankan putaran"],
     ];
     byId("todo-list").innerHTML = tugas
       .map(([n, teks, href, aksi]) =>
@@ -304,42 +322,38 @@
   });
   byId("search-status").addEventListener("change", () => loadPendaftar().catch(() => {}));
 
-  // ================= ANTREAN =================
-  let queueRows = [];
-  let selectedQueue = "all";
-  function renderQueue() {
-    const visible = selectedQueue === "all" ? queueRows : queueRows.filter((r) => String(r.queue_level) === selectedQueue);
-    byId("queue-table-body").innerHTML = visible.length
-      ? visible
-          .map((row) => `<tr>
-          <td><b>#${row.giliran}</b><small>ke-${row.posisi} di Q${row.queue_level}</small></td>
-          <td><b>${escapeHtml(row.nama_usaha)}</b><small>${escapeHtml(row.nama_pemilik)} · antre sejak ${formatDate(row.waktu_antre, false)}${row.jumlah_timeout ? ` · ${row.jumlah_timeout}× timeout` : ""}</small></td>
-          <td>${qBadge(row.queue_level)}</td>
-          <td>${meter(row.kebutuhan_muka)}</td>
-          <td class="activity-note">${escapeHtml((row.alasan_queue || []).join("; "))}</td></tr>`)
-          .join("")
-      : '<tr><td colspan="5" class="table-message">Tidak ada pendaftar pada antrean ini.</td></tr>';
-    byId("queue-foot").textContent = `${visible.length} pendaftar menunggu ruang yang muat`;
-  }
+  // ================= ANTREAN (putaran alokasi MLQ) =================
   async function loadAntrean() {
-    const [queues] = await Promise.all([api("/antrean"), loadBadges()]);
-    let giliran = 0;
-    queueRows = [1, 2, 3].flatMap((level) =>
-      (queues[`queue_${level}`] || []).map((row, i) => ({ ...row, posisi: i + 1, giliran: ++giliran })));
-    byId("tab-all").textContent = queueRows.length;
-    [1, 2, 3].forEach((l) => (byId(`tab-q${l}`).textContent = queueRows.filter((r) => r.queue_level === l).length));
-    renderQueue();
-  }
-  document.querySelectorAll("[data-queue-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedQueue = button.dataset.queueFilter;
-      document.querySelectorAll("[data-queue-filter]").forEach((tab) => {
-        tab.classList.toggle("active", tab === button);
-        tab.setAttribute("aria-pressed", String(tab === button));
-      });
-      renderQueue();
+    const [p] = await Promise.all([api("/antrean/putaran"), loadBadges()]);
+    [1, 2, 3].forEach((level) => {
+      const rows = p.rencana.filter((r) => r.queue_level === level);
+      byId(`lane-count-${level}`).textContent = rows.length;
+      byId(`lane-${level}`).innerHTML = rows.length
+        ? rows
+            .map((r, i) => `<li class="${r.dapat ? "akan-dapat" : "belum-muat"}">
+              <span class="turn">#${r.giliran}</span>
+              <div><b>${escapeHtml(r.nama_usaha)}</b>
+                <small>ke-${i + 1} di Q${level} · butuh ${meter(r.kebutuhan_muka)} · daftar ${formatDate(r.waktu_antre)}${r.jumlah_timeout ? ` · ${r.jumlah_timeout}× timeout` : ""}</small>
+                <small class="why">${escapeHtml(r.alasan_queue.join("; "))}</small></div>
+              <em>${r.dapat ? `Zona ${escapeHtml(r.zona)} · m ke-${r.mulai}` : "belum muat"}</em></li>`)
+            .join("")
+        : '<li class="lane-empty">Tidak ada yang mengantre</li>';
     });
-  });
+    const manual = p.mode !== "langsung";
+    byId("round-button").disabled = !p.akan_dapat;
+    byId("dispatch-summary").innerHTML = p.jumlah_menunggu
+      ? `<b>${p.jumlah_menunggu}</b> pendaftar terverifikasi menunggu. Putaran berikutnya memberi lapak kepada <b>${p.akan_dapat}</b> pendaftar${
+          p.akan_dapat < p.jumlah_menunggu ? `; ${p.jumlah_menunggu - p.akan_dapat} lainnya belum muat dan tetap di antrean` : ""}.`
+      : `Antrean kosong.${p.menunggu_verifikasi ? ` Ada <b>${p.menunggu_verifikasi}</b> pendaftar yang belum diverifikasi; mereka masuk antrean setelah diterima di menu Verifikasi.` : ""}`;
+    if (!manual) byId("dispatch-summary").innerHTML += " <small>(Mode langsung: lapak dibagikan seketika saat pendaftar siap.)</small>";
+  }
+  byId("round-button").addEventListener("click", (e) =>
+    aksi(e.currentTarget, async () => {
+      const h = await post("/antrean/putaran");
+      return h.dialokasikan
+        ? `Putaran selesai: ${h.dialokasikan} pendaftar mendapat lapak (${h.lapak.join(", ")}). Mereka punya ${info.timeout_hari} hari untuk konfirmasi.`
+        : "Putaran selesai: tidak ada ruang bersambung yang muat untuk pendaftar yang menunggu.";
+    }));
 
   // ================= DENAH =================
   const SEG = { Kosong: "kosong", Dipesan: "dipesan", Terisi: "terisi" };

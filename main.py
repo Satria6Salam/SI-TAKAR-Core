@@ -61,6 +61,16 @@ app = FastAPI(title="SI-TAKAR App", version="1.0.0", lifespan=lifespan)
 # Izinkan frontend/desainer memanggil API dari origin lain saat development
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+
+@app.middleware("http")
+async def selalu_periksa_versi_terbaru(request, call_next):
+    """Browser wajib menanyakan ulang halaman & berkas statis (dijawab 304 bila tidak berubah),
+    supaya tampilan baru langsung terpakai tanpa harus membersihkan cache."""
+    response = await call_next(request)
+    if request.url.path.startswith("/static/") or "text/html" in response.headers.get("content-type", ""):
+        response.headers.setdefault("Cache-Control", "no-cache")
+    return response
+
 # Pendaftaran Endpoint Router Backend
 app.include_router(api_pendaftaran.router)
 app.include_router(api_alokasi.router)

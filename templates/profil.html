@@ -9,28 +9,32 @@
   </head>
   <body data-page="profil">
     <header class="public-nav">
-      <a class="brand" href="/"
-        ><span class="brand-mark">▦</span
-        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
-      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
-        ☰
-      </button>
+      <a class="brand" href="/" aria-label="SI-TAKAR Beranda">
+        <span class="brand-mark" aria-hidden="true">ST</span>
+        <span><b>Si-Takar</b><small>PASAR SENI KIOS UMKM</small></span>
+      </a>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">☰</button>
       <nav class="nav-links" data-nav>
-        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
-        ><a href="/status">Status</a
-        ><a class="active" href="/profil">Lapak Saya</a>
+        <a href="/">Beranda</a>
+        <a href="/pendaftaran">Pendaftaran</a>
+        <a href="/status">Status</a>
+        <a class="active" href="/profil">Lapak Saya</a>
       </nav>
-      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
+      <a class="help-link" href="/pendaftaran">Daftar Kios</a>
     </header>
-    <main class="profile-shell">
-      <div class="page-intro">
-        <span class="kicker">AREA PENYEWA</span>
-        <h1>Lapak saya</h1>
-        <p>
-          Catat kios buka setiap hari berjualan. Lapak yang tutup terlalu lama
-          dicabut otomatis dan diberikan ke antrean berikutnya.
-        </p>
+    <section class="page-hero torn-bottom">
+      <div>
+        <span class="kicker">Area penyewa</span>
+        <h1>Lapak <span class="script">saya</span></h1>
+        <p>Catat kios buka setiap hari berjualan. Lapak yang tutup terlalu lama dicabut otomatis dan diberikan ke antrean berikutnya.</p>
       </div>
+      <div class="page-hero-art" aria-hidden="true">
+        <div class="hoop"><img src="/static/img/pembatik.webp" alt="" /></div>
+        <div class="hoop small"><img src="/static/img/anyaman-gantung.webp" alt="" /></div>
+      </div>
+    </section>
+    <div class="inner-body">
+    <main class="profile-shell">
 
       <section class="card status-result" id="profile-empty" hidden>
         <div class="empty-state">
@@ -45,7 +49,7 @@
               placeholder="Contoh: STK-7K4M2Q"
               autocomplete="off"
               maxlength="12"
-            /><button class="btn btn-green" type="submit">Buka</button>
+            /><input id="profile-pin" required class="pin-input" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN" autocomplete="current-password" aria-label="PIN 6 angka" style="max-width:150px" /><button class="btn btn-green" type="submit">Buka</button>
           </form>
           <p class="form-note">
             <a class="text-link inline" href="/lupa-kode">Lupa kode pendaftaran?</a>
@@ -61,6 +65,7 @@
             <p id="profile-owner">–</p>
           </div>
           <span class="pill" id="profile-status">–</span>
+          <button class="btn btn-light" id="profile-logout" type="button">Keluar</button>
         </section>
         <div class="profile-grid">
           <div class="profile-main">
@@ -102,17 +107,8 @@
                 ><small id="p-lapak-detail">–</small>
               </div>
               <p class="muted" id="p-terakhir">–</p>
-              <label class="pin-field"
-                >PIN Anda<input
-                  id="activity-pin"
-                  type="password"
-                  inputmode="numeric"
-                  pattern="[0-9]{6}"
-                  maxlength="6"
-                  autocomplete="current-password"
-                  placeholder="••••••"
-              /></label>
-              <button class="btn btn-green full-width" id="activity-button">
+              <p class="absen-status" id="absen-status"></p>
+              <button class="btn absen-btn belum" id="activity-button">
                 ✓ Buka kios hari ini
               </button>
               <p id="activity-message" class="form-note" role="status"></p>
@@ -135,8 +131,23 @@
         </div>
       </div>
     </main>
+    </div>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="script">Si-Takar</span>
+          <p>Sistem Tata Kelola Kios Pasar Seni untuk UMKM <span data-info="domisili_pasar">Kabupaten Malang</span>.</p>
+        </div>
+        <div>
+          <h4>Untuk penjual</h4>
+          <a href="/pendaftaran">Daftar kios</a><a href="/status">Status pendaftaran</a><a href="/profil">Lapak saya</a><a href="/lupa-kode">Lupa kode</a>
+        </div>
+        <div>
+          <h4>Pengelola</h4>
+          <a href="/admin/login">Masuk admin</a><a href="/#aturan">Aturan pasar</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</p>
     </footer>
   </body>
 </html>

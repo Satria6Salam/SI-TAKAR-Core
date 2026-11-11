@@ -16,11 +16,14 @@ Aplikasi berjalan **di laptop lokal** (tanpa hosting): **FastAPI** + **SQLite** 
 Rincian aturan:
 
 - **Skoring MLQ.** Queue 3 bila KTP luar kota, produk bukan buatan sendiri (reseller, waralaba, impor), atau punya lebih dari satu toko. Queue 1 bila warga lokal dengan status khusus, atau pengrajin kriya/seni/antik yang belum punya toko. Sisanya Queue 2. Pendaftar tidak memilih prioritasnya sendiri; alasan penilaian disimpan dan ditampilkan.
+- **Putaran alokasi.** Lapak tidak dibagikan seketika saat satu pendaftar siap, karena itu sama saja dengan "siapa cepat dia dapat". Pendaftar terverifikasi berkumpul di antrean, lalu admin menekan **Jalankan putaran alokasi** di menu Antrean MLQ: dalam satu putaran Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Halaman itu menampilkan pratinjau giliran dan ruang yang akan didapat tiap pendaftar sebelum putaran dijalankan. Isi `PUTARAN_ALOKASI=langsung` untuk kembali ke pembagian seketika.
 - **Worst-Fit.** Ukuran permintaan adalah panjang muka lapak (meter). Bila pendaftar terdepan butuh ruang yang belum tersedia secara bersambung, ia tetap di posisinya dan giliran diberikan ke pendaftar berikutnya yang muat, supaya ruang tidak menganggur.
 - **Timeout.** Pendaftar yang kena timeout dilempar ke urutan terbawah queue-nya. Setelah `MAKS_TIMEOUT` kali, pendaftarannya gugur supaya tidak berputar terus.
 - **Mutex.** Timer background dan request browser berjalan di thread berbeda. Bagian "baca ruang kosong lalu potong lapak" dilindungi satu kunci (`penjadwal.KUNCI`) agar satu ruang tidak terpotong untuk dua UMKM.
 - **Verifikasi dokumen.** Pendaftar mengunggah KTP (dan bukti bila mengajukan status khusus). Pengelola menerima, menerima tanpa status khusus (jalur dinilai ulang), atau menolak dengan alasan. Urutan antrean tetap dihitung dari waktu daftar, jadi lamanya pemeriksaan tidak merugikan pendaftar. Matikan dengan `VERIFIKASI_WAJIB=0`.
-- **Aging (opsional).** Isi `AGING_HARI` di `.env` untuk menaikkan pendaftar Queue 2/3 yang terlalu lama menunggu. Bawaan `0` (nonaktif), sesuai Project Charter.
+- **Putaran harian otomatis.** Selain lewat tombol admin, putaran juga berjalan sendiri sekali sehari mulai pukul `PUTARAN_HARIAN_JAM` WIB (bawaan 07.00), supaya ruang yang dilepas tidak menganggur bila admin lupa. Isi `-1` untuk mematikannya.
+- **Rekam jejak pelanggaran.** Penjual yang hak sewanya pernah dicabut (Preemption) atau yang gugur karena berulang kali timeout dalam `PENALTI_HARI` terakhir (bawaan 180 hari) turun satu tingkat prioritas saat mendaftar ulang. Alasannya ditampilkan di daftar "Mengapa Queue …". Isi `0` untuk mematikannya.
+- **Aging (opsional).** Isi `AGING_HARI` di `.env` untuk menaikkan pendaftar Queue 2/3 yang terlalu lama menunggu. Lama menunggu dihitung sejak pendaftar diverifikasi, bukan sejak mendaftar. Bawaan `0` (nonaktif), sesuai Project Charter.
 
 ## Menjalankan
 
@@ -57,7 +60,7 @@ Hanya untuk laptop lokal.
 .venv\Scripts\python.exe seed.py --reset  # kosongkan SELURUH data lalu isi ulang data awal
 ```
 
-Database versi lama (skema lapak tetap) tidak dihapus: saat aplikasi dijalankan, berkasnya dipindah menjadi `si_takar.db.lama-<tanggal>`.
+Bila versi baru hanya menambah kolom yang boleh kosong, kolom itu ditambahkan otomatis dan data lama tetap utuh. Bila strukturnya berubah besar, berkas lama tidak dihapus melainkan dipindah menjadi `si_takar.db.lama-<tanggal>`.
 
 ## Alur demo yang disarankan
 
@@ -89,7 +92,8 @@ Jam sistem yang dimajukan hanya menggeser jam di dalam aplikasi; jam laptop tida
 ### Keamanan akun penjual
 
 - Penjual dikenali lewat **kode pendaftaran** (contoh `STK-7K4M2Q`) dan **PIN 6 angka** yang dibuat sendiri saat mendaftar.
-- Kode saja cukup untuk *melihat* status (nomor telepon disamarkan). Konfirmasi lapak, mencatat kios buka, dan mengunggah dokumen wajib memakai PIN.
+- Status dan Lapak Saya hanya terbuka bagi pemilik yang masuk dengan kode + PIN; penjual tidak bisa membuka data penjual lain. Keduanya meminta PIN setiap kali halaman dibuka dan punya tombol Keluar.
+- Tombol **Buka kios hari ini** berwarna mustard selama belum absen hari itu (WIB) dan berubah menjadi teal muda bertanda centang setelah absen.
 - PIN salah 5 kali berturut-turut mengunci aksi selama 15 menit. Begitu juga pencarian lupa kode.
 - **Lupa kode:** buka `/lupa-kode`, masukkan NIK dan nomor telepon saat mendaftar.
 - **Lupa PIN:** PIN disimpan terenkripsi sehingga tidak bisa ditampilkan. Pengelola mencocokkan KTP asli, lalu menekan **Atur ulang PIN** di halaman Cari pendaftar; PIN baru tampil sekali.

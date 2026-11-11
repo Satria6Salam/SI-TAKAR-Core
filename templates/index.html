@@ -3,19 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SI-TAKAR | Pasar Seni Kota</title>
+    <title>SI-TAKAR | Kios Pasar Seni Kabupaten Malang</title>
     <link rel="stylesheet" href="/static/css/style.css" />
     <script src="/static/js/app.js" defer></script>
   </head>
-  <body class="public-page" data-page="beranda">
+  <body data-page="beranda">
     <header class="public-nav">
       <a class="brand" href="/" aria-label="SI-TAKAR Beranda">
-        <span class="brand-mark">▦</span
-        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span>
+        <span class="brand-mark" aria-hidden="true">ST</span>
+        <span><b>Si-Takar</b><small>PASAR SENI KIOS UMKM</small></span>
       </a>
-      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
-        ☰
-      </button>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">☰</button>
       <nav class="nav-links" data-nav>
         <a class="active" href="/">Beranda</a>
         <a href="/pendaftaran">Pendaftaran</a>
@@ -23,66 +21,137 @@
         <a href="/profil">Lapak Saya</a>
         <a href="/admin/login">Admin</a>
       </nav>
-      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
+      <a class="help-link" href="/pendaftaran">Daftar Kios</a>
     </header>
+
     <main>
-      <section class="hero">
+      <!-- HERO -->
+      <section class="hero torn-bottom">
         <div class="hero-copy">
           <span class="eyebrow"><i></i> PENDAFTARAN KIOS DIBUKA</span>
-          <h1>Kios pasar seni yang tepat, lewat proses yang adil.</h1>
+          <h1>
+            Ruang jualan untuk
+            <span class="script">pengrajin lokal</span>
+          </h1>
           <p>
-            SI-TAKAR membagi lapak bukan berdasarkan siapa yang paling cepat,
-            melainkan siapa yang paling berhak. Antrean, alokasi ruang, dan
+            Kios Pasar Seni dibagi bukan berdasarkan siapa yang paling cepat,
+            melainkan siapa yang paling berhak. Antrean, pembagian ruang, dan
             batas waktu dijalankan otomatis oleh sistem dan bisa dipantau siapa
             saja.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-coral" href="/pendaftaran"
-              >➜ Daftar UMKM sekarang</a
-            >
-            <a class="btn btn-light" href="/status">Cek status pendaftaran</a>
+            <a class="btn btn-mustard" href="/pendaftaran">Daftar UMKM sekarang →</a>
+            <a class="btn btn-ghost-light" href="/status">Cek status</a>
           </div>
-          <div class="trust-row">
-            <span>✓ Gratis mendaftar</span><span>✓ Prioritas dihitung sistem</span
-            ><span>✓ Denah pasar terbuka</span>
+          <div class="hero-stats" aria-label="Ketersediaan ruang">
+            <div><small>Ruang kosong</small><b id="hero-empty">–</b></div>
+            <div><small>Lapak terisi</small><b id="hero-filled">–</b></div>
+            <div><small>Keterisian</small><b id="hero-occupancy">–</b></div>
           </div>
         </div>
-        <aside class="availability-card">
-          <div class="card-heading">
-            <div>
-              <h2>Ketersediaan ruang saat ini</h2>
-              <p class="muted small" id="avail-updated">Memuat data pasar…</p>
-            </div>
-            <span class="pill pill-green"><i></i> Langsung dari sistem</span>
-          </div>
-          <div class="metric-pair">
-            <div class="metric metric-green">
-              <strong id="avail-empty">–</strong><span>meter muka masih kosong</span>
-            </div>
-            <div class="metric metric-cream">
-              <strong id="avail-total">–</strong><span>meter total pasar</span>
-            </div>
-          </div>
-          <div class="zone-list" id="zone-list"></div>
-          <div class="recommendation" id="avail-note" hidden></div>
-        </aside>
+        <div class="collage" aria-hidden="true">
+          <div class="hoop h1"><img src="/static/img/hoop-kain.webp" alt="" /></div>
+          <div class="hoop h2"><img src="/static/img/pembatik.webp" alt="" /></div>
+          <div class="hoop h3"><img src="/static/img/anyaman-dinding.webp" alt="" /></div>
+          <div class="hoop h4"><img src="/static/img/sulaman-motif.webp" alt="" /></div>
+          <div class="collage-badge"><span><b>Q1</b>Pengrajin lokal didahulukan</span></div>
+          <span class="ring"></span>
+          <span class="dot-float d1"></span><span class="dot-float d2"></span><span class="dot-float d3"></span>
+        </div>
       </section>
 
-      <section class="process-section">
-        <div class="section-heading">
-          <div>
-            <span class="kicker">DENAH PASAR TERKINI</span>
-            <h2>Setiap lorong dipotong sesuai kebutuhan.</h2>
-          </div>
-          <p>
-            Lapak baru selalu dipotong dari ruang kosong yang paling luas,
-            supaya sisa ruangnya tetap layak disewa pedagang berikutnya.
-          </p>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span class="marquee-item"><img src="/static/img/pembatik.webp" alt="" />BATIK TULIS <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/anyaman-dinding.webp" alt="" />ANYAMAN BAMBU <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/sulaman-motif.webp" alt="" />SULAMAN &amp; BORDIR <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/hoop-kain.webp" alt="" />KAIN MOTIF <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/display-kios.webp" alt="" />KIOS SENI <span class="script">✦</span></span>
+          <span class="marquee-item"><span class="script">Pasar seni untuk semua</span> ✦</span>
+          <span class="marquee-item"><img src="/static/img/pembatik.webp" alt="" />BATIK TULIS <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/anyaman-dinding.webp" alt="" />ANYAMAN BAMBU <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/sulaman-motif.webp" alt="" />SULAMAN &amp; BORDIR <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/hoop-kain.webp" alt="" />KAIN MOTIF <span class="script">✦</span></span>
+          <span class="marquee-item"><img src="/static/img/display-kios.webp" alt="" />KIOS SENI <span class="script">✦</span></span>
+          <span class="marquee-item"><span class="script">Pasar seni untuk semua</span> ✦</span>
         </div>
-        <div class="card map-card">
-          <div class="zone-strips" id="public-map">
-            <p class="muted small">Memuat denah…</p>
+      </div>
+
+      <!-- LANGKAH -->
+      <section class="section" id="aturan">
+        <span class="float-deco" style="width: 90px; height: 90px; left: 3%; top: 70px" aria-hidden="true"><img src="/static/img/hoop-kain.webp" alt="" /></span>
+        <span class="float-deco" style="width: 60px; height: 60px; right: 5%; top: 120px; animation-delay: -4s" aria-hidden="true"><img src="/static/img/anyaman-gantung.webp" alt="" /></span>
+        <div class="section-head">
+          <span class="kicker">Alur pendaftaran</span>
+          <h2>4 Langkah <span class="script">Mendapat Kios</span></h2>
+          <p>Setiap tahap berjalan otomatis. Tidak ada tahap yang bisa dilompati atau ditahan oleh satu pihak.</p>
+        </div>
+        <div class="process-grid">
+          <article class="process-card">
+            <span class="process-num">1</span><span class="process-icon">✎</span>
+            <h3>Daftar &amp; unggah KTP</h3>
+            <p>Isi data usaha, unggah KTP, dan buat PIN 6 angka. Sistem langsung menghitung jalur antrean Anda.</p>
+          </article>
+          <article class="process-card">
+            <span class="process-num">2</span><span class="process-icon">✓</span>
+            <h3>Diverifikasi</h3>
+            <p>Pengelola memeriksa dokumen. Urutan antrean tetap dihitung dari waktu Anda mendaftar.</p>
+          </article>
+          <article class="process-card">
+            <span class="process-num">3</span><span class="process-icon">✂</span>
+            <h3>Lapak dipotong</h3>
+            <p>Ruang kosong terluas dipotong sepanjang kebutuhan Anda. Konfirmasi dalam <span data-info="timeout_hari">3</span> hari.</p>
+          </article>
+          <article class="process-card">
+            <span class="process-num">4</span><span class="process-icon">☀</span>
+            <h3>Buka kios setiap hari</h3>
+            <p>Catat kios buka. Tutup <span data-info="preemption_hari">14</span> hari berturut-turut berarti lapak diberikan ke antrean berikutnya.</p>
+          </article>
+        </div>
+        <div class="ribbon">
+          <div class="ribbon-num"><b id="ribbon-empty">–</b><span>meter muka kios<br />masih kosong hari ini</span></div>
+          <span class="script">Pasar seni untuk semua</span>
+          <a class="btn btn-green" href="/pendaftaran">Mulai daftar</a>
+        </div>
+      </section>
+
+      <!-- KETERSEDIAAN -->
+      <section class="section section-cream torn-top" style="--prev: #fff">
+        <div class="split">
+          <div>
+            <span class="kicker">Denah pasar terkini</span>
+            <h2>Setiap lorong dipotong <span class="script">sesuai kebutuhan</span></h2>
+            <p>
+              Lapak baru selalu dipotong dari ruang kosong yang paling luas,
+              supaya sisa ruangnya tetap layak disewa pedagang berikutnya, bukan
+              celah sempit yang terbuang.
+            </p>
+            <aside class="availability-card">
+              <div class="card-heading">
+                <div>
+                  <h3>Ketersediaan ruang saat ini</h3>
+                  <p class="muted small" id="avail-updated">Memuat data pasar…</p>
+                </div>
+                <span class="pill pill-green"><i></i> Langsung dari sistem</span>
+              </div>
+              <div class="metric-pair">
+                <div class="metric metric-green">
+                  <strong id="avail-empty">–</strong><span>meter muka masih kosong</span>
+                </div>
+                <div class="metric metric-cream">
+                  <strong id="avail-total">–</strong><span>meter total pasar</span>
+                </div>
+              </div>
+              <div class="zone-list" id="zone-list"></div>
+              <div class="recommendation" id="avail-note" hidden></div>
+            </aside>
           </div>
+          <div class="torn-photo">
+            <img src="/static/img/display-kios.webp" alt="Contoh tampilan kios kerajinan dengan panel bundar bermotif" />
+          </div>
+        </div>
+        <div class="card map-card" style="margin-top: 40px">
+          <div class="zone-strips" id="public-map"><p class="muted small">Memuat denah…</p></div>
           <div class="map-legend">
             <span><i class="sw sw-kosong"></i> Kosong</span>
             <span><i class="sw sw-dipesan"></i> Dipesan, menunggu konfirmasi</span>
@@ -91,66 +160,120 @@
         </div>
       </section>
 
-      <section class="process-section" id="aturan">
-        <div class="section-heading">
-          <div>
-            <span class="kicker">ATURAN YANG DIJALANKAN SISTEM</span>
-            <h2>Dari pendaftaran hingga menempati kios.</h2>
-          </div>
-          <p>
-            Empat tahap berikut berjalan otomatis. Tidak ada tahap yang bisa
-            dilompati atau ditahan oleh satu pihak.
-          </p>
+      <!-- JALUR ANTREAN -->
+      <section class="section">
+        <span class="float-deco" style="width: 74px; height: 74px; right: 4%; top: 60px; animation-delay: -2s" aria-hidden="true"><img src="/static/img/sulaman-motif.webp" alt="" /></span>
+        <span class="float-deco" style="width: 52px; height: 52px; left: 6%; bottom: 80px; animation-delay: -6s" aria-hidden="true"><img src="/static/img/anyaman-dinding.webp" alt="" /></span>
+        <div class="section-head">
+          <span class="kicker">Multilevel queue</span>
+          <h2>Tiga Jalur <span class="script">Antrean yang Adil</span></h2>
+          <p>Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Jalur dihitung sistem dari data Anda, bukan dipilih sendiri.</p>
         </div>
-        <div class="process-grid">
-          <article class="process-card">
-            <span class="process-icon">▤</span><b>01</b>
-            <h3>Daftar &amp; dinilai</h3>
-            <p>
-              Sistem membaca domisili, jenis usaha, dan asal produk, lalu
-              menempatkan Anda di Queue 1, 2, atau 3.
-            </p>
+        <div class="queue-cards">
+          <article class="queue-card featured">
+            <figure><img src="/static/img/batik-nenek-cucu.webp" alt="Pembatik lansia mengajari cucunya membatik" /><span>Queue 1</span></figure>
+            <div class="q-body">
+              <h3>Afirmasi &amp; Pelestarian</h3>
+              <p class="q-sub">dilayani paling awal</p>
+              <ul>
+                <li>Pengrajin kriya, seni, batik buatan sendiri</li>
+                <li>Belum punya toko fisik</li>
+                <li>Penyandang disabilitas &amp; warga pra-sejahtera</li>
+                <li>Warga <span data-info="domisili_pasar">Kabupaten Malang</span></li>
+              </ul>
+            </div>
           </article>
-          <article class="process-card">
-            <span class="process-icon">☷</span><b>02</b>
-            <h3>Antre sesuai prioritas</h3>
-            <p>
-              Queue 1 dilayani sampai habis, lalu Queue 2, lalu Queue 3. Di
-              dalam satu queue berlaku siapa lebih dulu.
-            </p>
+          <article class="queue-card">
+            <figure><img src="/static/img/hoop-kain.webp" alt="Kain bordir dalam bingkai bundar" /><span>Queue 2</span></figure>
+            <div class="q-body">
+              <h3>Pendukung Ekosistem</h3>
+              <p class="q-sub">setelah Queue 1 habis</p>
+              <ul>
+                <li>Kuliner, fesyen, aksesoris lokal</li>
+                <li>Jasa kreatif (lukis wajah, suvenir)</li>
+                <li>Produksi sendiri</li>
+                <li>Pengrajin yang sudah punya 1 toko</li>
+              </ul>
+            </div>
           </article>
-          <article class="process-card">
-            <span class="process-icon">⌖</span><b>03</b>
-            <h3>Lapak dipotong</h3>
-            <p>
-              Ruang kosong terluas dipotong sepanjang kebutuhan Anda. Anda punya
-              <span data-info="timeout_hari">3</span> hari untuk konfirmasi.
-            </p>
-          </article>
-          <article class="process-card">
-            <span class="process-icon">♧</span><b>04</b>
-            <h3>Buka kios rutin</h3>
-            <p>
-              Tutup <span data-info="peringatan_hari">7</span> hari kena
-              peringatan, tutup <span data-info="preemption_hari">14</span> hari
-              hak sewa dicabut untuk antrean berikutnya.
-            </p>
+          <article class="queue-card">
+            <figure><img src="/static/img/anyaman-gantung.webp" alt="Instalasi anyaman bambu bundar berwarna" /><span>Queue 3</span></figure>
+            <div class="q-body">
+              <h3>Komersial &amp; Ekspansi</h3>
+              <p class="q-sub">mengisi sisa ruang</p>
+              <ul>
+                <li>Pedagang dari luar daerah</li>
+                <li>Reseller, waralaba, produk impor</li>
+                <li>Usaha dengan lebih dari satu toko</li>
+              </ul>
+            </div>
           </article>
         </div>
       </section>
-      <section class="bottom-help" id="bantuan">
-        <div>
-          <b>Sudah punya kode pendaftaran?</b>
-          <p>
-            Pantau posisi antrean, konfirmasi lapak, dan catat kios buka dari
-            halaman Status dan Lapak Saya.
-          </p>
+
+      <!-- AFIRMASI -->
+      <section class="section section-cream">
+        <div class="split split-reverse">
+          <div class="photo-stack" aria-hidden="true">
+            <div class="tall"><img src="/static/img/anyaman-dinding.webp" alt="" /></div>
+            <div class="tall right"><img src="/static/img/sulaman-motif.webp" alt="" /></div>
+            <div class="round"><img src="/static/img/pembatik.webp" alt="" /></div>
+            <div class="vertical-mark">3×<small>jalur prioritas</small></div>
+          </div>
+          <div>
+            <span class="kicker">Mengapa SI-TAKAR</span>
+            <h2>Menjaga <span class="script">identitas Pasar Seni</span></h2>
+            <p>
+              Sistem siapa-cepat-dia-dapat membuat usaha bermodal besar selalu
+              unggul. SI-TAKAR membalik urutannya supaya pengrajin kecil dan
+              kelompok rentan mendapat tempat lebih dulu.
+            </p>
+            <ul class="check-list">
+              <li><span>1</span><div><b>Prioritas transparan</b><small>Setiap pendaftar melihat alasan jalur antreannya.</small></div></li>
+              <li><span>2</span><div><b>Ruang tidak terbuang</b><small>Lapak dipotong dari ruang kosong terluas (Worst-Fit).</small></div></li>
+              <li><span>3</span><div><b>Lapak tidak ditahan</b><small>Lapak yang tidak dipakai dilepas otomatis untuk antrean berikutnya.</small></div></li>
+            </ul>
+            <a class="btn btn-green" href="/pendaftaran">Daftarkan usaha Anda</a>
+          </div>
         </div>
-        <a class="btn btn-outline" href="/status">Cek status →</a>
+      </section>
+
+      <section class="cta-band torn-top" style="--prev: var(--cream)">
+        <div class="inner">
+          <span class="kicker" style="color: var(--mustard)">Sudah mendaftar?</span>
+          <h2>Pantau antrean dan <span class="script">buka kios setiap hari</span></h2>
+          <p>Masuk dengan kode pendaftaran dan PIN untuk melihat posisi antrean, mengonfirmasi lapak, dan mencatat kios buka.</p>
+          <div class="hero-actions">
+            <a class="btn btn-mustard" href="/status">Cek status</a>
+            <a class="btn btn-ghost-light" href="/lupa-kode">Lupa kode?</a>
+          </div>
+        </div>
       </section>
     </main>
+
+    <div class="bottom-help">
+      <b>Butuh bantuan mendaftar?</b>
+      <p>Datang ke kantor pengelola Pasar Seni dengan membawa KTP.</p>
+    </div>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="script">Si-Takar</span>
+          <p>Sistem Tata Kelola Kios Pasar Seni untuk UMKM <span data-info="domisili_pasar">Kabupaten Malang</span>.</p>
+          <div class="thumbs" aria-hidden="true">
+            <img src="/static/img/pembatik.webp" alt="" /><img src="/static/img/hoop-kain.webp" alt="" /><img src="/static/img/anyaman-dinding.webp" alt="" /><img src="/static/img/display-kios.webp" alt="" />
+          </div>
+        </div>
+        <div>
+          <h4>Untuk penjual</h4>
+          <a href="/pendaftaran">Daftar kios</a><a href="/status">Status pendaftaran</a><a href="/profil">Lapak saya</a><a href="/lupa-kode">Lupa kode</a>
+        </div>
+        <div>
+          <h4>Pengelola</h4>
+          <a href="/admin/login">Masuk admin</a><a href="/#aturan">Aturan pasar</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</p>
     </footer>
   </body>
 </html>

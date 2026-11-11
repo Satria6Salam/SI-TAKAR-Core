@@ -9,29 +9,32 @@
   </head>
   <body class="form-page" data-page="pendaftaran">
     <header class="public-nav">
-      <a class="brand" href="/"
-        ><span class="brand-mark">▦</span
-        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
-      >
-      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
-        ☰
-      </button>
+      <a class="brand" href="/" aria-label="SI-TAKAR Beranda">
+        <span class="brand-mark" aria-hidden="true">ST</span>
+        <span><b>Si-Takar</b><small>PASAR SENI KIOS UMKM</small></span>
+      </a>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">☰</button>
       <nav class="nav-links" data-nav>
-        <a href="/">Beranda</a
-        ><a class="active" href="/pendaftaran">Pendaftaran</a
-        ><a href="/status">Status</a><a href="/profil">Lapak Saya</a>
+        <a href="/">Beranda</a>
+        <a class="active" href="/pendaftaran">Pendaftaran</a>
+        <a href="/status">Status</a>
+        <a href="/profil">Lapak Saya</a>
       </nav>
-      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
+      <a class="help-link" href="/pendaftaran">Daftar Kios</a>
     </header>
-    <main class="form-shell">
-      <div class="page-intro">
-        <span class="kicker">PENDAFTARAN UMKM</span>
-        <h1>Daftarkan usaha Anda</h1>
-        <p>
-          Isi data apa adanya. Jalur antrean Anda dihitung sistem dari jawaban
-          di bawah, bukan dipilih sendiri, dan alasannya langsung ditampilkan.
-        </p>
+    <section class="page-hero torn-bottom">
+      <div>
+        <span class="kicker">Pendaftaran UMKM</span>
+        <h1>Daftarkan <span class="script">usaha Anda</span></h1>
+        <p>Isi data apa adanya. Jalur antrean dihitung sistem dari jawaban Anda, bukan dipilih sendiri, dan alasannya langsung ditampilkan.</p>
       </div>
+      <div class="page-hero-art" aria-hidden="true">
+        <div class="hoop"><img src="/static/img/batik-nenek-cucu.webp" alt="" /></div>
+        <div class="hoop small"><img src="/static/img/anyaman-dinding.webp" alt="" /></div>
+      </div>
+    </section>
+    <div class="inner-body">
+    <main class="form-shell">
       <div class="form-layout">
         <form id="registration-form" class="form-card" novalidate>
           <div class="form-section">
@@ -357,8 +360,23 @@
         </aside>
       </div>
     </main>
+    </div>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="script">Si-Takar</span>
+          <p>Sistem Tata Kelola Kios Pasar Seni untuk UMKM <span data-info="domisili_pasar">Kabupaten Malang</span>.</p>
+        </div>
+        <div>
+          <h4>Untuk penjual</h4>
+          <a href="/pendaftaran">Daftar kios</a><a href="/status">Status pendaftaran</a><a href="/profil">Lapak saya</a><a href="/lupa-kode">Lupa kode</a>
+        </div>
+        <div>
+          <h4>Pengelola</h4>
+          <a href="/admin/login">Masuk admin</a><a href="/#aturan">Aturan pasar</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</p>
     </footer>
   </body>
 </html>

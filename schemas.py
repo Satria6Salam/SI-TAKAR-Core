@@ -89,6 +89,8 @@ class AlokasiOut(BaseModel):
     terakhir_aktif: datetime | None
     hari_tidak_aktif: int | None = None
     peringatan: bool = Field(False, description="True jika tidak aktif >= batas peringatan")
+    terakhir_absen: datetime | None = None
+    sudah_absen_hari_ini: bool = False
     sewa_mulai: datetime | None = None
     sewa_berakhir: datetime | None = None
     sisa_hari_sewa: int | None = None
@@ -137,11 +139,17 @@ PIN_POLA = r"^\d{6}$"
 
 
 class PinIn(BaseModel):
+    """PIN boleh dikosongkan bila penjual sudah masuk (sesi kode + PIN di browser ini)."""
+    pin: str | None = Field(None, pattern=PIN_POLA)
+
+
+class MasukPenjualIn(BaseModel):
+    kode: str = Field(min_length=4, max_length=12)
     pin: str = Field(pattern=PIN_POLA)
 
 
 class DokumenIn(BaseModel):
-    pin: str = Field(pattern=PIN_POLA)
+    pin: str | None = Field(None, pattern=PIN_POLA)
     jenis: Literal["ktp", "khusus"]
     nama_file: str = Field("", max_length=200)
     data_base64: str = Field(min_length=10, description="Isi berkas (JPG/PNG/PDF) dalam base64")

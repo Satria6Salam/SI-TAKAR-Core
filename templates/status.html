@@ -9,28 +9,32 @@
   </head>
   <body data-page="status">
     <header class="public-nav">
-      <a class="brand" href="/"
-        ><span class="brand-mark">▦</span
-        ><span><b>SI-TAKAR</b><small>PASAR SENI KOTA</small></span></a
-      ><button class="mobile-menu" data-menu-toggle aria-label="Buka menu">
-        ☰
-      </button>
+      <a class="brand" href="/" aria-label="SI-TAKAR Beranda">
+        <span class="brand-mark" aria-hidden="true">ST</span>
+        <span><b>Si-Takar</b><small>PASAR SENI KIOS UMKM</small></span>
+      </a>
+      <button class="mobile-menu" data-menu-toggle aria-label="Buka menu">☰</button>
       <nav class="nav-links" data-nav>
-        <a href="/">Beranda</a><a href="/pendaftaran">Pendaftaran</a
-        ><a class="active" href="/status">Status</a
-        ><a href="/profil">Lapak Saya</a>
+        <a href="/">Beranda</a>
+        <a href="/pendaftaran">Pendaftaran</a>
+        <a class="active" href="/status">Status</a>
+        <a href="/profil">Lapak Saya</a>
       </nav>
-      <a class="help-link" href="/#aturan">ⓘ <span>Aturan pasar</span></a>
+      <a class="help-link" href="/pendaftaran">Daftar Kios</a>
     </header>
-    <main class="status-shell">
-      <div class="page-intro">
-        <span class="kicker">STATUS ANTREAN</span>
-        <h1>Periksa status pendaftaran</h1>
-        <p>
-          Masukkan kode pendaftaran untuk melihat jalur antrean, posisi Anda,
-          dan lapak yang dialokasikan. Halaman ini memperbarui diri otomatis.
-        </p>
+    <section class="page-hero torn-bottom">
+      <div>
+        <span class="kicker">Status antrean</span>
+        <h1>Periksa <span class="script">status pendaftaran</span></h1>
+        <p>Masuk dengan kode pendaftaran dan PIN untuk melihat jalur antrean, posisi Anda, dan lapak yang dialokasikan.</p>
       </div>
+      <div class="page-hero-art" aria-hidden="true">
+        <div class="hoop"><img src="/static/img/hoop-kain.webp" alt="" /></div>
+        <div class="hoop small"><img src="/static/img/sulaman-motif.webp" alt="" /></div>
+      </div>
+    </section>
+    <div class="inner-body">
+    <main class="status-shell">
       <section class="status-search card">
         <form id="status-search-form">
           <label for="status-code">Kode pendaftaran</label>
@@ -40,7 +44,7 @@
               placeholder="Contoh: STK-7K4M2Q"
               autocomplete="off"
               maxlength="12"
-            /><button class="btn btn-green" type="submit">
+            /><input id="status-pin" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN" autocomplete="current-password" aria-label="PIN 6 angka" style="max-width:150px" /><button class="btn btn-green" type="submit">
               Periksa status
             </button>
           </div>
@@ -67,8 +71,23 @@
         <div id="history-list"></div>
       </section>
     </main>
+    </div>
     <footer class="site-footer">
-      © 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="script">Si-Takar</span>
+          <p>Sistem Tata Kelola Kios Pasar Seni untuk UMKM <span data-info="domisili_pasar">Kabupaten Malang</span>.</p>
+        </div>
+        <div>
+          <h4>Untuk penjual</h4>
+          <a href="/pendaftaran">Daftar kios</a><a href="/status">Status pendaftaran</a><a href="/profil">Lapak saya</a><a href="/lupa-kode">Lupa kode</a>
+        </div>
+        <div>
+          <h4>Pengelola</h4>
+          <a href="/admin/login">Masuk admin</a><a href="/#aturan">Aturan pasar</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 SI-TAKAR · Sistem Tata Kelola Kios Pasar Seni</p>
     </footer>
   </body>
 </html>

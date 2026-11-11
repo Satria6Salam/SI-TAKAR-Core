@@ -14,7 +14,9 @@ os.environ["PREEMPTION_HARI"] = "14"
 os.environ["MAKS_TIMEOUT"] = "3"
 os.environ["SEWA_HARI"] = "180"
 os.environ["AGING_HARI"] = "0"
-os.environ["VERIFIKASI_WAJIB"] = "0"   # tes verifikasi menyalakannya sendiri
+os.environ["VERIFIKASI_WAJIB"] = "0"
+os.environ["PUTARAN_ALOKASI"] = "langsung"
+os.environ["PUTARAN_HARIAN_JAM"] = "-1"   # tes putaran manual menyalakannya sendiri   # tes verifikasi menyalakannya sendiri
 os.environ["UNGGAHAN_DIR"] = os.path.join(_tmp, "unggahan")
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 

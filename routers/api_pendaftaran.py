@@ -3,21 +3,27 @@ import binascii
 import secrets
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from algoritma.jam import sekarang
-from algoritma.mlq_scoring import NAMA_QUEUE, nilai_queue
-from algoritma.penjadwal import antrean_menunggu, jalankan_alokasi, posisi_dalam_queue
+from datetime import timedelta
+
+from algoritma.mlq_scoring import NAMA_QUEUE, nilai_queue, penalti_rekam_jejak
+from algoritma.penjadwal import (alokasi_otomatis, antrean_menunggu, jalankan_alokasi,
+                                 posisi_dalam_queue, rencana_putaran)
 from database import config
 from database.config import get_db
-from database.models import (LogAktivitas, StatusAlokasi, StatusPendaftaran, StatusVerifikasi,
+from database.models import (ArsipPelanggaran, LogAktivitas, StatusAlokasi, StatusPendaftaran, StatusVerifikasi,
                              UMKM, Zona, catat)
-from routers.admin_security import hash_password, require_admin
+from routers.admin_security import (SELLER_COOKIE, SELLER_TTL_SECONDS, create_seller_token,
+                                    get_seller_kode, hash_password, require_admin)
 from routers.helpers import (alokasi_terkini, alokasi_to_out, catat_gagal, cek_kunci, cek_pin,
-                             hapus_kunci, log_to_out, norm_telepon, samarkan_telepon,
-                             umkm_dari_kode)
-from schemas import DokumenIn, LupaKodeIn, StatusAntreanOut, UMKMCreate, UMKMOut
+                             hapus_kunci, log_to_out, norm_telepon, pastikan_pemilik,
+                             samarkan_telepon, umkm_dari_kode)
+from schemas import (DokumenIn, LupaKodeIn, MasukPenjualIn, StatusAntreanOut, UMKMCreate,
+                     UMKMOut)
 
 router = APIRouter(tags=["Pendaftaran & Antrean"])
 
@@ -45,6 +51,9 @@ def info_aturan():
         "sewa_hari": config.SEWA_HARI,
         "aging_hari": config.AGING_HARI,
         "verifikasi_wajib": config.VERIFIKASI_WAJIB,
+        "putaran_alokasi": config.PUTARAN_ALOKASI,
+        "putaran_harian_jam": config.PUTARAN_HARIAN_JAM,
+        "penalti_hari": config.PENALTI_HARI,
         "maks_unggah_mb": MAKS_UNGGAH // (1024 * 1024),
         "nama_queue": NAMA_QUEUE,
     }
@@ -56,6 +65,28 @@ def pratinjau_queue(domisili: str = "", jenis_usaha: str = "", status_khusus: bo
     """Hitung jalur antrean tanpa menyimpan apa pun (pratinjau langsung di formulir)."""
     level, alasan = nilai_queue(domisili, jenis_usaha, status_khusus, jumlah_cabang, sumber_produk)
     return {"queue_level": level, "nama_queue": NAMA_QUEUE[level], "alasan": alasan}
+
+
+def rekam_jejak(db: Session, nik: str, now) -> list[tuple]:
+    """Pelanggaran berat milik NIK ini dalam PENALTI_HARI terakhir, terbaru dulu."""
+    if config.PENALTI_HARI <= 0:
+        return []
+    batas = now - timedelta(days=config.PENALTI_HARI)
+    hasil = []
+    for u in db.query(UMKM).filter(UMKM.nik == nik).all():
+        if u.status_pendaftaran == StatusPendaftaran.DICABUT:
+            jenis = "Preemption"
+        elif u.status_pendaftaran == StatusPendaftaran.GUGUR:
+            jenis = "Gugur"
+        else:
+            continue
+        waktu = (db.query(ArsipPelanggaran.waktu_kejadian)
+                 .filter(ArsipPelanggaran.umkm_id == u.id)
+                 .order_by(ArsipPelanggaran.waktu_kejadian.desc()).limit(1).scalar())
+        if waktu and waktu >= batas:
+            hasil.append((jenis, f"{waktu:%d-%m-%Y}", waktu))
+    hasil.sort(key=lambda x: x[2], reverse=True)
+    return [(j, t) for j, t, _ in hasil]
 
 
 def daftarkan(db: Session, data: UMKMCreate, now=None, langsung_antre: bool | None = None) -> UMKM:
@@ -80,6 +111,7 @@ def daftarkan(db: Session, data: UMKMCreate, now=None, langsung_antre: bool | No
 
     level, alasan = nilai_queue(data.domisili, data.jenis_usaha, data.status_khusus,
                                 data.jumlah_cabang, data.sumber_produk)
+    level, alasan = penalti_rekam_jejak(level, alasan, rekam_jejak(db, data.nik, now))
     isian = data.model_dump(exclude={"pin"})
     isian["telepon"] = norm_telepon(data.telepon)
     umkm = UMKM(
@@ -100,12 +132,47 @@ def daftarkan(db: Session, data: UMKMCreate, now=None, langsung_antre: bool | No
     return umkm
 
 
+def _dengan_sesi(request: Request, kode: str, isi: StatusAntreanOut, status_code: int = 200):
+    """Balasan JSON + cookie sesi penjual untuk kode ini."""
+    resp = JSONResponse(isi.model_dump(mode="json"), status_code=status_code)
+    resp.set_cookie(SELLER_COOKIE, create_seller_token(kode), max_age=SELLER_TTL_SECONDS,
+                    httponly=True, samesite="lax", secure=request.url.scheme == "https", path="/")
+    return resp
+
+
 @router.post("/pendaftaran", response_model=StatusAntreanOut, status_code=201)
-def daftar_umkm(data: UMKMCreate, db: Session = Depends(get_db)):
-    """Daftarkan UMKM baru -> skoring MLQ -> (verifikasi) -> antrean -> alokasi Worst-Fit."""
+def daftar_umkm(data: UMKMCreate, request: Request, db: Session = Depends(get_db)):
+    """Daftarkan UMKM baru -> skoring MLQ -> (verifikasi) -> antrean -> alokasi Worst-Fit.
+
+    Pendaftar langsung masuk (sesi) karena baru saja membuat PIN-nya sendiri.
+    """
     umkm = daftarkan(db, data)
-    jalankan_alokasi(db)  # kalau sudah boleh mengantre dan ada ruang yang muat, langsung dipanggil
-    return _status(db, umkm)
+    alokasi_otomatis(db)  # mode "langsung": dibagi seketika; mode "manual": tunggu putaran
+    return _dengan_sesi(request, umkm.kode_pendaftaran, _status(db, umkm), 201)
+
+
+# ---------- Sesi penjual: hanya pemilik kode + PIN yang bisa membuka data pendaftarannya ----------
+@router.post("/penjual/masuk", response_model=StatusAntreanOut)
+def masuk_penjual(data: MasukPenjualIn, request: Request, db: Session = Depends(get_db)):
+    umkm = umkm_dari_kode(db, data.kode)
+    cek_pin(umkm, data.pin)
+    return _dengan_sesi(request, umkm.kode_pendaftaran, _status(db, umkm))
+
+
+@router.post("/penjual/keluar")
+def keluar_penjual():
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie(SELLER_COOKIE, path="/")
+    return resp
+
+
+@router.get("/penjual/saya", response_model=StatusAntreanOut)
+def pendaftaran_saya(request: Request, db: Session = Depends(get_db)):
+    """Status milik penjual yang sedang masuk di browser ini."""
+    kode = get_seller_kode(request)
+    if not kode:
+        raise HTTPException(401, "Masuk dulu dengan kode pendaftaran dan PIN")
+    return _status(db, umkm_dari_kode(db, kode))
 
 
 # ---------- Dokumen (KTP & bukti status khusus) ----------
@@ -130,10 +197,10 @@ def simpan_dokumen(db: Session, umkm: UMKM, jenis: str, isi: bytes) -> str:
 
 
 @router.post("/pendaftaran/{kode}/dokumen")
-def unggah_dokumen(kode: str, data: DokumenIn, db: Session = Depends(get_db)):
-    """Unggah foto/PDF KTP atau bukti status khusus (wajib kode + PIN)."""
+def unggah_dokumen(kode: str, data: DokumenIn, request: Request, db: Session = Depends(get_db)):
+    """Unggah foto/PDF KTP atau bukti status khusus (pemilik: PIN atau sesi masuk)."""
     umkm = umkm_dari_kode(db, kode)
-    cek_pin(umkm, data.pin)
+    pastikan_pemilik(request, umkm, data.pin)
     if umkm.status_verifikasi in StatusVerifikasi.SUDAH_DIPUTUS:
         raise HTTPException(409, "Data sudah diputus pengelola; dokumen tidak bisa diganti lagi")
     if data.jenis == "khusus" and not umkm.status_khusus:
@@ -173,8 +240,11 @@ def lupa_kode(data: LupaKodeIn, db: Session = Depends(get_db)):
 
 # ---------- Status & antrean ----------
 @router.get("/pendaftaran/{kode}/status", response_model=StatusAntreanOut)
-def status_antrean(kode: str, db: Session = Depends(get_db)):
-    """Dasbor Status Antrean: jalur queue, posisi, alokasi terkini, dan riwayat."""
+def status_antrean(kode: str, request: Request, db: Session = Depends(get_db)):
+    """Dasbor Status Antrean (khusus pemilik yang sudah masuk dengan kode + PIN)."""
+    # Sesi diperiksa lebih dulu supaya orang lain tidak bisa menebak kode mana yang ada
+    if get_seller_kode(request) != kode.strip().upper():
+        raise HTTPException(401, "Masuk dulu dengan kode pendaftaran dan PIN")
     return _status(db, umkm_dari_kode(db, kode))
 
 
@@ -185,6 +255,48 @@ def daftar_antrean(db: Session = Depends(get_db), _admin=Depends(require_admin))
     for u in antrean_menunggu(db).all():
         hasil[f"queue_{u.queue_level}"].append(UMKMOut.model_validate(u))
     return hasil
+
+
+def _rencana_out(db: Session) -> dict:
+    rencana = rencana_putaran(db)
+    baris = [{
+        "giliran": r.giliran, "id": r.umkm.id, "kode_pendaftaran": r.umkm.kode_pendaftaran,
+        "nama_usaha": r.umkm.nama_usaha, "nama_pemilik": r.umkm.nama_pemilik,
+        "queue_level": r.umkm.queue_level, "kebutuhan_muka": r.umkm.kebutuhan_muka,
+        "waktu_antre": r.umkm.waktu_antre, "jumlah_timeout": r.umkm.jumlah_timeout,
+        "alasan_queue": [b for b in (r.umkm.alasan_queue or "").splitlines() if b],
+        "dapat": r.hole is not None,
+        "zona": r.hole.zona_kode if r.hole else None,
+        "mulai": r.hole.mulai if r.hole else None,
+    } for r in rencana]
+    return {
+        "mode": config.PUTARAN_ALOKASI,
+        "jumlah_menunggu": len(baris),
+        "akan_dapat": sum(1 for b in baris if b["dapat"]),
+        "menunggu_verifikasi": db.query(UMKM).filter(
+            UMKM.status_pendaftaran == StatusPendaftaran.MENUNGGU_VERIFIKASI).count(),
+        "rencana": baris,
+    }
+
+
+@router.get("/antrean/putaran")
+def pratinjau_putaran(db: Session = Depends(get_db), _admin=Depends(require_admin)):
+    """Pratinjau putaran alokasi: urutan giliran Q1 -> Q2 -> Q3 dan siapa akan dapat ruang di mana."""
+    return _rencana_out(db)
+
+
+@router.post("/antrean/putaran")
+def jalankan_putaran(db: Session = Depends(get_db), _admin=Depends(require_admin)):
+    """Jalankan satu putaran alokasi MLQ + Worst-Fit untuk semua pendaftar yang menunggu."""
+    now = sekarang(db)
+    sebelum = db.query(UMKM).filter(UMKM.status_pendaftaran == StatusPendaftaran.MENUNGGU).count()
+    baru = jalankan_alokasi(db, now)
+    catat(db, "Putaran Alokasi", waktu=now, keterangan=(
+        f"Putaran dijalankan: {len(baru)} dari {sebelum} pendaftar mendapat lapak "
+        f"(urutan Queue 1 -> 2 -> 3)."))
+    db.commit()
+    return {"dialokasikan": len(baru), "sebelumnya_menunggu": sebelum,
+            "lapak": [a.lapak.kode_lapak for a in baru], **_rencana_out(db)}
 
 
 def _status(db: Session, umkm: UMKM) -> StatusAntreanOut:

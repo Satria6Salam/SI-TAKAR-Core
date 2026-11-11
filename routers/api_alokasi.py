@@ -1,24 +1,24 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from algoritma.deadlock_cron import jalankan_semua
 from algoritma.jam import sekarang
-from algoritma.penjadwal import KUNCI, jalankan_alokasi
+from algoritma.penjadwal import KUNCI, alokasi_otomatis
 from database.config import SEWA_HARI, get_db
 from database.models import (AlokasiSewa, ArsipPelanggaran, StatusAlokasi, StatusLapak,
                              StatusPendaftaran, catat)
 from routers.admin_security import require_admin
-from routers.helpers import alokasi_terkini, alokasi_to_out, cek_pin, umkm_dari_kode
+from routers.helpers import alokasi_terkini, alokasi_to_out, pastikan_pemilik, umkm_dari_kode
 from schemas import AlokasiOut, LogDeadlockOut, PinIn
 
 router = APIRouter(prefix="/alokasi", tags=["Alokasi & Deadlock"])
 
 
-def _alokasi_umkm(db: Session, kode: str, pin: str) -> AlokasiSewa:
+def _alokasi_umkm(db: Session, kode: str, pin: str | None, request: Request) -> AlokasiSewa:
     umkm = umkm_dari_kode(db, kode)
-    cek_pin(umkm, pin)
+    pastikan_pemilik(request, umkm, pin)
     a = alokasi_terkini(db, umkm.id)
     if a is None:
         raise HTTPException(404, "UMKM ini belum mendapat alokasi lapak")
@@ -46,10 +46,11 @@ def aktifkan(db: Session, a: AlokasiSewa, now) -> None:
 
 # ---------- Dipakai UMKM (tanda pengenal = kode pendaftaran) ----------
 @router.post("/{kode}/konfirmasi", response_model=AlokasiOut)
-def konfirmasi_lapak(kode: str, data: PinIn, db: Session = Depends(get_db)):
+def konfirmasi_lapak(kode: str, request: Request, data: PinIn | None = None,
+                     db: Session = Depends(get_db)):
     """UMKM menyetujui lapak -> timer Timeout berhenti, lapak jadi Terisi, masa sewa dimulai."""
     with KUNCI:
-        a = _alokasi_umkm(db, kode, data.pin)
+        a = _alokasi_umkm(db, kode, data.pin if data else None, request)
         now = sekarang(db)
         if a.status_alokasi != StatusAlokasi.MENUNGGU:
             raise HTTPException(409, f"Alokasi berstatus '{a.status_alokasi}', tidak bisa dikonfirmasi")
@@ -62,13 +63,14 @@ def konfirmasi_lapak(kode: str, data: PinIn, db: Session = Depends(get_db)):
 
 
 @router.post("/{kode}/absen", response_model=AlokasiOut)
-def buka_kios_hari_ini(kode: str, data: PinIn, db: Session = Depends(get_db)):
+def buka_kios_hari_ini(kode: str, request: Request, data: PinIn | None = None,
+                       db: Session = Depends(get_db)):
     """Tombol 'Buka Kios Hari Ini' -> reset hitungan tidak aktif (cegah Preemption)."""
-    a = _alokasi_umkm(db, kode, data.pin)
+    a = _alokasi_umkm(db, kode, data.pin if data else None, request)
     if a.status_alokasi != StatusAlokasi.AKTIF:
         raise HTTPException(409, f"Alokasi berstatus '{a.status_alokasi}', bukan Aktif")
     now = sekarang(db)
-    a.terakhir_aktif = now
+    a.terakhir_aktif = a.terakhir_absen = now
     a.peringatan_dikirim = False
     catat(db, "Absen", f"Kios {a.lapak.kode_lapak} dibuka.", umkm_id=a.umkm_id, waktu=now)
     db.commit()
@@ -97,7 +99,7 @@ def inspeksi_admin(alokasi_id: int, db: Session = Depends(get_db), _admin=Depend
     if a.status_alokasi != StatusAlokasi.AKTIF:
         raise HTTPException(409, f"Alokasi berstatus '{a.status_alokasi}', bukan Aktif")
     now = sekarang(db)
-    a.terakhir_aktif = now
+    a.terakhir_aktif = a.terakhir_absen = now
     a.peringatan_dikirim = False
     catat(db, "Inspeksi", f"Admin mencatat kios {a.lapak.kode_lapak} buka.",
           umkm_id=a.umkm_id, waktu=now)
@@ -121,7 +123,7 @@ def lulus_inkubasi(alokasi_id: int, db: Session = Depends(get_db), _admin=Depend
             f"{a.umkm.nama_usaha} lulus inkubasi; lapak {a.lapak.kode_lapak} dilepas."))
         db.commit()
         hasil = alokasi_to_out(a, now)
-        jalankan_alokasi(db, now)
+        alokasi_otomatis(db, now)
         return hasil
 
 

@@ -36,26 +36,52 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_session_token(username: str) -> str:
-    expires = int(time.time()) + SESSION_TTL_SECONDS
-    payload = f"{username}|{expires}".encode()
+def create_session_token(subjek: str, ttl: int = SESSION_TTL_SECONDS) -> str:
+    """Token bertanda tangan HMAC berisi subjek dan waktu kedaluwarsa."""
+    expires = int(time.time()) + ttl
+    payload = f"{subjek}|{expires}".encode()
     encoded = base64.urlsafe_b64encode(payload).decode().rstrip("=")
     signature = hmac.new(SESSION_SECRET, encoded.encode(), hashlib.sha256).hexdigest()
     return f"{encoded}.{signature}"
 
 
-def get_admin_session(request: Request, db: Session) -> Admin | None:
-    token = request.cookies.get(SESSION_COOKIE, "")
+def read_session_token(token: str) -> str | None:
+    """Subjek token bila tanda tangannya sah dan belum kedaluwarsa."""
     try:
         encoded, signature = token.rsplit(".", 1)
         expected = hmac.new(SESSION_SECRET, encoded.encode(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(signature, expected):
             return None
         payload = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4)).decode()
-        username, expires = payload.rsplit("|", 1)
+        subjek, expires = payload.rsplit("|", 1)
         if int(expires) < int(time.time()):
             return None
     except (ValueError, UnicodeDecodeError):
+        return None
+    return subjek
+
+
+# ---- Sesi penjual: kode pendaftaran + PIN -> cookie terpisah dari sesi admin ----
+SELLER_COOKIE = "si_takar_penjual"
+SELLER_TTL_SECONDS = 12 * 60 * 60
+_AWALAN_PENJUAL = "penjual:"
+
+
+def create_seller_token(kode: str) -> str:
+    return create_session_token(_AWALAN_PENJUAL + kode, SELLER_TTL_SECONDS)
+
+
+def get_seller_kode(request: Request) -> str | None:
+    """Kode pendaftaran milik penjual yang sedang masuk di browser ini (atau None)."""
+    subjek = read_session_token(request.cookies.get(SELLER_COOKIE, ""))
+    if subjek and subjek.startswith(_AWALAN_PENJUAL):
+        return subjek[len(_AWALAN_PENJUAL):]
+    return None
+
+
+def get_admin_session(request: Request, db: Session) -> Admin | None:
+    username = read_session_token(request.cookies.get(SESSION_COOKIE, ""))
+    if not username or username.startswith(_AWALAN_PENJUAL):
         return None
     return db.query(Admin).filter(Admin.username == username).first()
 

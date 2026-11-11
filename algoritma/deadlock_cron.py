@@ -10,7 +10,7 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 
 from algoritma.jam import sekarang
-from algoritma.penjadwal import KUNCI, jalankan_alokasi, terapkan_aging
+from algoritma.penjadwal import KUNCI, alokasi_otomatis, putaran_harian, terapkan_aging
 from database.config import MAKS_TIMEOUT, PERINGATAN_HARI, PREEMPTION_HARI
 from database.models import (AlokasiSewa, ArsipPelanggaran, StatusAlokasi, StatusLapak,
                              StatusPendaftaran, catat)
@@ -108,12 +108,14 @@ def jalankan_semua(db: Session, now=None) -> dict:
         hasil_p = cek_preemption(db, now)
         aging_ids = terapkan_aging(db, now)
         # yang baru kena timeout tidak langsung diberi ruang lagi di siklus yang sama
-        baru = jalankan_alokasi(db, now, exclude_umkm_ids=timeout_ids)
+        baru = alokasi_otomatis(db, now, exclude_umkm_ids=timeout_ids)
+        harian = putaran_harian(db, now, exclude_umkm_ids=timeout_ids)
         return {
             "timeout": timeout_ids,
             "preemption": hasil_p["preemption"],
             "peringatan": hasil_p["peringatan"],
             "sewa_berakhir": sewa_ids,
             "aging": aging_ids,
-            "alokasi_baru": [a.id for a in baru],
+            "alokasi_baru": [a.id for a in baru + harian],
+            "putaran_harian": len(harian),
         }

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Kaushan+Script&display=swap");
 
 :root {
   --admin-ink: #202c26;
@@ -1732,5 +1732,838 @@ td small {
   }
   .welcome-actions {
     width: 100%;
+  }
+}
+
+/* ===== Antrean MLQ: jalur Q1/Q2/Q3 + putaran alokasi ===== */
+.dispatch-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--admin-line);
+}
+.dispatch-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dispatch-flow i {
+  color: #a3aca5;
+  font-style: normal;
+}
+.flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.flow-step b {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  background: #fff;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.flow-step.q1 {
+  color: #9a4f12;
+  background: #fde9d6;
+}
+.flow-step.q2 {
+  color: #85590d;
+  background: #fbf2dd;
+}
+.flow-step.q3 {
+  color: #56625a;
+  background: #e9ece8;
+}
+.flow-step.cpu {
+  color: #fff;
+  background: var(--admin-green);
+}
+.flow-step.cpu b {
+  color: var(--admin-green);
+}
+.dispatch-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  max-width: 640px;
+}
+.dispatch-action p {
+  flex: 1 1 260px;
+  margin: 0;
+  color: #536057;
+  font-size: 12px;
+}
+.lanes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.lane {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--admin-line);
+  border-top: 3px solid;
+}
+.lane.q1 {
+  border-top-color: #e08a3c;
+}
+.lane.q2 {
+  border-top-color: #d69b2f;
+}
+.lane.q3 {
+  border-top-color: #9aa39b;
+}
+.lane header {
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf0ed;
+}
+.lane header b {
+  display: block;
+  font: 700 14px "Manrope", sans-serif;
+}
+.lane header span {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+.lane ol {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lane li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 4px 10px;
+  padding: 11px 14px;
+  border-top: 1px solid #f0f2ef;
+  font-size: 11px;
+}
+.lane li:first-child {
+  border-top: 0;
+}
+.lane li .turn {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #fff;
+  background: var(--admin-forest);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 11px;
+}
+.lane li b {
+  display: block;
+  color: #334138;
+  font-size: 12px;
+}
+.lane li small {
+  display: block;
+  color: #89928b;
+  font-size: 10px;
+}
+.lane li small.why {
+  margin-top: 2px;
+  color: #a1a9a3;
+}
+.lane li em {
+  grid-column: 2;
+  justify-self: start;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+.lane li.akan-dapat em {
+  color: #2f6a45;
+  background: #e3f0e4;
+}
+.lane li.belum-muat em {
+  color: #78827b;
+  background: #eef0ed;
+}
+.lane li.belum-muat .turn {
+  background: #b9c1bb;
+}
+.lane .lane-empty {
+  display: block;
+  padding: 26px 14px;
+  color: #a1a9a3;
+  text-align: center;
+}
+.lanes-hint {
+  margin: 10px 2px 0;
+}
+@media (max-width: 1000px) {
+  .lanes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* =========================================================
+   TEMA BARU ADMIN: teal + mustard, foto kerajinan, animasi
+   (menimpa gaya dasar di atas)
+   ========================================================= */
+:root {
+  --admin-ink: #1d2a28;
+  --admin-muted: #6b7874;
+  --admin-line: #e3e9e6;
+  --admin-canvas: #f6f2ea;
+  --admin-green: #0f5c57;
+  --admin-forest: #0a3f3c;
+  --admin-coral: #c0583a;
+  --admin-yellow: #f2b13a;
+  --admin-blue: #2f6f86;
+  --a-teal-2: #157a71;
+  --a-teal-soft: #e3f1ee;
+  --a-mustard-soft: #fff4dc;
+  --a-radius: 18px;
+  --a-shadow: 0 10px 28px rgba(15, 60, 56, 0.08);
+  --a-script: "Kaushan Script", "Brush Script MT", cursive;
+}
+body,
+.admin-page {
+  background: var(--admin-canvas);
+  font: 14px/1.55 "Poppins", "Segoe UI", sans-serif;
+}
+.admin-brand b,
+.welcome-row h1,
+.panel-heading h2,
+.metric-card > strong,
+.lane header b,
+.rule-card b,
+.drawer-head h2,
+.verify-head h2,
+.tool-card > b,
+.zone-strip-head b,
+.clock-bar b,
+.todo-row b,
+.pin-box b {
+  font-family: "Poppins", sans-serif;
+}
+
+/* ---------- sidebar ---------- */
+.admin-sidebar {
+  background:
+    linear-gradient(180deg, rgba(10, 63, 60, 0.97), rgba(10, 63, 60, 0.92) 60%, rgba(10, 63, 60, 0.82)),
+    url("/static/img/sulaman-motif.webp") center/cover;
+  box-shadow: 6px 0 24px rgba(10, 63, 60, 0.18);
+}
+.admin-brand-mark {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: url("/static/img/anyaman-dinding.webp") center/cover;
+  box-shadow: 0 0 0 3px var(--admin-yellow);
+  font-size: 0;
+}
+.admin-brand b {
+  font-family: var(--a-script);
+  font-weight: 400;
+  font-size: 23px;
+}
+.admin-brand small {
+  color: #bcd6d0;
+}
+.sidebar-label {
+  color: #9cc3bb;
+}
+.admin-nav a {
+  margin: 1px 0;
+  border-left: 0;
+  border-radius: 12px;
+  color: #d3e6e1;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.admin-nav a span {
+  color: #9cc3bb;
+}
+.admin-nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(3px);
+}
+.admin-nav a.selected {
+  color: var(--admin-forest);
+  background: var(--admin-yellow);
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(242, 177, 58, 0.3);
+}
+.admin-nav a.selected span {
+  color: var(--admin-forest);
+}
+.nav-badge {
+  background: #fff;
+  color: var(--admin-forest);
+  animation: denyut 2s ease-in-out infinite;
+}
+.admin-nav a.selected .nav-badge {
+  background: var(--admin-forest);
+  color: #fff;
+}
+.nav-badge.warn {
+  background: var(--admin-coral);
+  color: #fff;
+}
+.sidebar-bottom {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+.service-dot {
+  animation: denyut 2s ease-in-out infinite;
+}
+
+/* ---------- topbar & tombol ---------- */
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+}
+.icon-button {
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+.icon-button:hover {
+  transform: rotate(180deg);
+}
+.btn-admin {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.btn-admin:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(15, 60, 56, 0.15);
+}
+.btn-primary {
+  background: var(--admin-green);
+}
+.btn-primary:hover {
+  background: var(--a-teal-2);
+}
+.btn-ghost {
+  border-color: #cfdcd8;
+}
+.text-action {
+  color: var(--admin-green);
+  font-weight: 600;
+}
+.today-label {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--a-mustard-soft);
+  color: #8a5a07;
+  font-weight: 600;
+}
+.today-label:empty {
+  display: none;
+}
+
+/* ---------- banner kepala halaman ---------- */
+.welcome-row {
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  min-height: 150px;
+  padding: 26px 210px 30px 28px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 30%, rgba(242, 177, 58, 0.28), transparent 30%),
+    linear-gradient(120deg, var(--admin-forest), var(--admin-green) 70%);
+  color: #fff;
+  box-shadow: var(--a-shadow);
+  animation: masuk-admin 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.welcome-row::before,
+.welcome-row::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow: 0 0 0 3px #c99a5b, 0 14px 28px rgba(0, 0, 0, 0.3);
+  background: center/cover;
+  animation: melayang-admin 8s ease-in-out infinite;
+}
+.welcome-row::before {
+  right: 54px;
+  top: 18px;
+  width: 116px;
+  height: 116px;
+  background-image: url("/static/img/hoop-kain.webp");
+}
+.welcome-row::after {
+  right: 22px;
+  bottom: 14px;
+  width: 58px;
+  height: 58px;
+  background-image: url("/static/img/pembatik.webp");
+  animation-delay: -3s;
+  animation-duration: 6s;
+}
+.welcome-row > div:first-child,
+.welcome-actions {
+  position: relative;
+  z-index: 1;
+}
+.welcome-row .eyebrow-admin {
+  color: var(--admin-yellow);
+}
+.welcome-row h1 {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+}
+.welcome-row p {
+  max-width: 620px;
+  color: #d4e8e3;
+  font-size: 13px;
+}
+.welcome-row .btn-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+.welcome-row .btn-primary {
+  background: var(--admin-yellow);
+  color: var(--admin-forest);
+}
+.welcome-row .btn-primary:hover {
+  background: #e09a17;
+}
+
+/* ---------- notifikasi & jam ---------- */
+.notice-bar {
+  padding: 12px 16px;
+  border-left: 0;
+  border-radius: 14px;
+  background: var(--a-teal-soft);
+  color: #1e4c47;
+  animation: masuk-admin 0.4s ease both;
+}
+.notice-bar.error {
+  background: #fcebe5;
+  color: #8c3a22;
+}
+.clock-bar {
+  border: 0;
+  border-radius: var(--a-radius);
+  background:
+    linear-gradient(90deg, #fff 70%, rgba(255, 255, 255, 0.85)),
+    url("/static/img/anyaman-dinding.webp") right center / 30% auto no-repeat,
+    #fff;
+  box-shadow: var(--a-shadow);
+}
+.clock-bar small.shifted {
+  color: var(--admin-coral);
+}
+
+/* ---------- kartu metrik ---------- */
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--a-radius);
+  background: #fff;
+  box-shadow: var(--a-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 30px rgba(15, 60, 56, 0.12);
+}
+.metric-card::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 14px solid;
+  opacity: 0.08;
+}
+.metric-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 18px;
+}
+.metric-card:nth-child(1) .metric-icon { background: var(--a-teal-soft); color: var(--admin-green); }
+.metric-card:nth-child(1)::after { border-color: var(--admin-green); }
+.metric-card:nth-child(2) .metric-icon { background: var(--a-mustard-soft); color: #b77a0b; }
+.metric-card:nth-child(2)::after { border-color: var(--admin-yellow); }
+.metric-card:nth-child(3) .metric-icon { background: #e6f0f4; color: var(--admin-blue); }
+.metric-card:nth-child(3)::after { border-color: var(--admin-blue); }
+.metric-card:nth-child(4) .metric-icon { background: #fcebe5; color: var(--admin-coral); }
+.metric-card:nth-child(4)::after { border-color: var(--admin-coral); }
+.metric-label {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+.metric-card > strong {
+  margin: 10px 0 4px;
+  color: var(--admin-forest);
+  font-size: 30px;
+  font-weight: 700;
+}
+.metric-foot {
+  font-size: 11px;
+}
+
+/* ---------- panel umum ---------- */
+.panel,
+.dispatch-bar,
+.lane,
+.rule-card,
+.tool-card,
+.verify-card,
+.drawer {
+  border: 0;
+  border-radius: var(--a-radius);
+  box-shadow: var(--a-shadow);
+}
+.panel,
+.lane {
+  overflow: hidden;
+}
+.panel {
+  animation: masuk-admin 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.overview-grid > .panel:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.panel-heading {
+  border-bottom: 1px dashed var(--admin-line);
+}
+.panel-heading h2 {
+  color: var(--admin-forest);
+  font-size: 15px;
+  font-weight: 700;
+}
+.section-index,
+.eyebrow-admin {
+  color: var(--admin-coral);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+th {
+  background: #f8faf9;
+  color: #7d8a86;
+  font-size: 10px;
+}
+td,
+td b {
+  font-size: 12px;
+}
+td small {
+  font-size: 10.5px;
+}
+tbody tr:hover td {
+  background: #fbfaf6;
+}
+.queue-badge,
+.status-chip,
+.violation-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.status-active {
+  color: var(--admin-green);
+  background: var(--a-teal-soft);
+}
+.status-pending {
+  color: #8a5a07;
+  background: var(--a-mustard-soft);
+}
+.queue-badge.q1 {
+  color: #9c3f24;
+  background: #fcebe5;
+}
+.queue-badge.q2 {
+  color: #8a5a07;
+  background: var(--a-mustard-soft);
+}
+
+/* ringkasan */
+.todo-row {
+  border-top: 1px dashed var(--admin-line);
+}
+.todo-row b {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fcebe5;
+  font-size: 16px;
+  font-weight: 700;
+}
+.todo-row em {
+  transition: transform 0.2s ease;
+}
+.todo-row:hover {
+  background: #fbfaf6;
+}
+.todo-row:hover em {
+  transform: translateX(4px);
+}
+.todo-done b {
+  background: var(--a-teal-soft);
+  color: var(--admin-green);
+}
+
+/* verifikasi & dokumen */
+.verify-card {
+  padding: 20px 22px;
+  border-left: 5px solid var(--admin-yellow);
+}
+.doc-box {
+  overflow: hidden;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  background: #fbfaf6;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+a.doc-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--a-shadow);
+}
+.doc-box img,
+.doc-pdf {
+  border-radius: 10px;
+}
+.verify-note,
+.search-bar input,
+.search-bar select,
+.tool-row input {
+  border-color: #d6dfdc;
+  border-radius: 12px;
+}
+.verify-note:focus,
+.search-bar input:focus,
+.search-bar select:focus {
+  outline: none;
+  border-color: var(--a-teal-2);
+  box-shadow: 0 0 0 3px rgba(21, 122, 113, 0.14);
+}
+
+/* antrean MLQ */
+.dispatch-bar {
+  background: #fff;
+}
+.flow-step {
+  border-radius: 999px;
+}
+.flow-step.q1 { color: #9c3f24; background: #fcebe5; }
+.flow-step.q2 { color: #8a5a07; background: var(--a-mustard-soft); }
+.flow-step.cpu { background: var(--admin-green); }
+.dispatch-flow i {
+  display: inline-block;
+  animation: alir 1.6s ease-in-out infinite;
+}
+.dispatch-flow i:nth-of-type(2) { animation-delay: 0.2s; }
+.dispatch-flow i:nth-of-type(3) { animation-delay: 0.4s; }
+.lane {
+  border-top: 0;
+  background: #fff;
+}
+.lane header {
+  padding: 16px 16px 14px;
+  color: #fff;
+}
+.lane header span {
+  color: rgba(255, 255, 255, 0.85);
+}
+.lane.q1 header { background: linear-gradient(120deg, #a94a2f, #c0583a); }
+.lane.q2 header { background: linear-gradient(120deg, #d1931b, #f2b13a); }
+.lane.q2 header,
+.lane.q2 header span { color: #3d2a05; }
+.lane.q3 header { background: linear-gradient(120deg, #5f6d69, #85928e); }
+.lane li {
+  border-top: 1px dashed var(--admin-line);
+  animation: masuk-admin 0.4s ease both;
+}
+.lane li .turn {
+  background: var(--admin-forest);
+}
+.lane li.akan-dapat em {
+  color: var(--admin-green);
+  background: var(--a-teal-soft);
+  border-radius: 999px;
+}
+.lane li.belum-muat em {
+  border-radius: 999px;
+}
+
+/* denah & alat */
+.map-panel .strip {
+  height: 56px;
+  padding: 3px;
+  border-radius: 12px;
+  background: #d9cbb5 url("/static/img/anyaman-dinding.webp") center/cover;
+}
+.map-panel .seg {
+  border-top: 0;
+  border-radius: 9px;
+  transition: transform 0.2s ease;
+}
+.map-panel .seg:hover {
+  transform: translateY(-3px);
+}
+.map-panel .seg-kosong {
+  background: rgba(227, 241, 238, 0.93);
+  color: var(--admin-green);
+}
+.map-panel .seg-dipesan {
+  background: #f7d27e;
+  color: #6b4505;
+}
+.map-panel .seg-terisi {
+  background: var(--a-teal-2);
+  color: #fff;
+}
+.empty-dot { background: #9fd0c5; }
+.reserved-dot { background: #f2b13a; }
+.occupied-dot { background: var(--a-teal-2); }
+.tool-card {
+  background: #fbfaf6;
+}
+.sim-card {
+  border: 0;
+  border-top: 3px solid #c9d2cf;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(15, 60, 56, 0.05);
+}
+.sim-card.sim-used {
+  border-top-color: var(--admin-yellow);
+}
+.mini-meter {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+.mini-meter i {
+  border-radius: 6px;
+}
+.rule-card {
+  background: linear-gradient(135deg, #fff 60%, var(--a-mustard-soft));
+}
+.rule-card b {
+  color: var(--admin-forest);
+}
+
+/* jurnal & panel detail */
+.journal-row {
+  border-top: 1px dashed var(--admin-line);
+}
+.drawer {
+  border-radius: 24px 0 0 24px;
+  animation: geser-masuk 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.drawer-head {
+  border-radius: 24px 0 0 0;
+  background:
+    linear-gradient(120deg, rgba(10, 63, 60, 0.95), rgba(15, 92, 87, 0.9)),
+    url("/static/img/sulaman-motif.webp") center/cover;
+  color: #fff;
+}
+.drawer-head h2 {
+  color: #fff;
+}
+.drawer-head .section-index {
+  color: var(--admin-yellow);
+}
+.drawer-backdrop {
+  backdrop-filter: blur(3px);
+  animation: pudar-masuk 0.3s ease both;
+}
+.pin-box {
+  border-left: 0;
+  border-radius: 14px;
+  background: var(--a-mustard-soft);
+}
+.admin-footer {
+  padding-top: 20px;
+}
+
+/* ---------- animasi ---------- */
+@keyframes masuk-admin {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes melayang-admin {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+@keyframes denyut {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 177, 58, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(242, 177, 58, 0); }
+}
+@keyframes alir {
+  0%, 100% { transform: translateX(0); opacity: 0.4; }
+  50% { transform: translateX(4px); opacity: 1; color: var(--admin-coral); }
+}
+@keyframes geser-masuk {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes pudar-masuk {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .welcome-row {
+    padding-right: 28px;
+  }
+  .welcome-row::before,
+  .welcome-row::after {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .admin-sidebar {
+    background: var(--admin-forest);
+  }
+  .welcome-row {
+    padding: 20px;
+    border-radius: 18px;
+  }
+  .drawer,
+  .drawer-head {
+    border-radius: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

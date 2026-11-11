@@ -9,6 +9,8 @@ Q2 (Pendukung Ekosistem)   : warga lokal lainnya (kuliner, fesyen, aksesoris, ja
 
 Prioritas TIDAK dipilih pendaftar; sistem yang menghitung dan menyimpan alasannya.
 """
+import re
+
 from database.config import DOMISILI_PASAR
 
 JENIS_KRIYA = {"kriya", "kerajinan", "kerajinan tangan", "seni rupa", "seni", "antik"}
@@ -23,9 +25,19 @@ def _norm(teks: str) -> str:
     return (teks or "").strip().lower()
 
 
+def _wilayah(teks: str) -> str:
+    """Seragamkan penulisan: 'Kab. Malang' / 'kab malang' -> 'kabupaten malang'."""
+    t = re.sub(r"[^a-z0-9 ]", " ", _norm(teks))
+    t = re.sub(r"\bkab\b", "kabupaten", t)
+    return " ".join(t.split())
+
+
 def is_warga_lokal(domisili: str) -> bool:
-    """True jika domisili (KTP) memuat nama kota/kabupaten lokasi pasar."""
-    return _norm(DOMISILI_PASAR) in _norm(domisili)
+    """True jika domisili (KTP) berada di kota/kabupaten lokasi pasar.
+
+    'Kota Malang' dan 'Kabupaten Malang' adalah wilayah berbeda, jadi jenisnya ikut dicocokkan.
+    """
+    return _wilayah(DOMISILI_PASAR) in _wilayah(domisili)
 
 
 def nilai_queue(domisili: str, jenis_usaha: str, status_khusus: bool = False,
@@ -59,6 +71,19 @@ def nilai_queue(domisili: str, jenis_usaha: str, status_khusus: bool = False,
     if jenis in JENIS_KRIYA:
         return 2, [lokal, f"Pengrajin {jenis}, tetapi sudah memiliki toko fisik"]
     return 2, [lokal, f"Usaha {jenis or 'umum'} produksi sendiri sebagai pendukung ekosistem pasar"]
+
+
+def penalti_rekam_jejak(level: int, alasan: list[str], pelanggaran: list[tuple]) -> tuple[int, list[str]]:
+    """Turunkan satu tingkat bila pernah dicabut/gugur. pelanggaran = [(jenis, tanggal_teks), ...]."""
+    if not pelanggaran:
+        return level, alasan
+    jenis, tanggal = pelanggaran[0]
+    sebab = {"Preemption": "hak sewanya pernah dicabut karena lapak tidak aktif",
+             "Gugur": "pernah gugur karena berulang kali tidak mengonfirmasi lapak"}.get(jenis, jenis)
+    baru = min(3, level + 1)
+    akibat = (f"prioritas diturunkan ke Queue {baru}" if baru != level
+              else "sudah berada di prioritas terendah")
+    return baru, alasan + [f"Rekam jejak: {sebab} ({tanggal}); {akibat}"]
 
 
 def tentukan_queue(domisili: str, jenis_usaha: str, status_khusus: bool = False,

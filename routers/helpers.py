@@ -6,9 +6,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from algoritma.jam import sekarang
-from database.config import PERINGATAN_HARI
+from datetime import timedelta
+
+from fastapi import Request
+
+from database.config import PERINGATAN_HARI, ZONA_WAKTU_JAM
 from database.models import AlokasiSewa, LogAktivitas, StatusAlokasi, UMKM
-from routers.admin_security import verify_password
+from routers.admin_security import get_seller_kode, verify_password
 from schemas import AlokasiOut, LogOut
 
 # ---- Pembatas percobaan (PIN salah / lupa kode) supaya tidak bisa ditebak beruntun ----
@@ -47,6 +51,21 @@ def cek_pin(umkm: UMKM, pin: str) -> None:
     hapus_kunci(kunci)
 
 
+def pastikan_pemilik(request: Request, umkm: UMKM, pin: str | None) -> None:
+    """Pemilik dibuktikan dengan PIN di permintaan, atau sesi masuk (kode + PIN) di browser.
+
+    PIN yang dikirim selalu diperiksa, walaupun ada sesi; PIN salah tetap ditolak.
+    """
+    if pin:
+        cek_pin(umkm, pin)
+    elif get_seller_kode(request) != umkm.kode_pendaftaran:
+        raise HTTPException(401, "Masuk dulu dengan kode pendaftaran dan PIN")
+
+
+def tanggal_lokal(waktu):
+    return (waktu + timedelta(hours=ZONA_WAKTU_JAM)).date() if waktu else None
+
+
 def norm_telepon(t: str) -> str:
     """0812-3456 / +62 812 3456 / 628123456 -> 08123456"""
     d = re.sub(r"\D", "", t or "")
@@ -76,6 +95,7 @@ def alokasi_to_out(a: AlokasiSewa, now) -> AlokasiOut:
         sisa = max(0, int((a.batas_konfirmasi - now).total_seconds()))
 
     hari_tidak_aktif, peringatan, sisa_sewa = None, False, None
+    sudah_absen = tanggal_lokal(a.terakhir_absen) == tanggal_lokal(now) if a.terakhir_absen else False
     if a.status_alokasi == StatusAlokasi.AKTIF:
         terakhir = a.terakhir_aktif or a.waktu_alokasi
         hari_tidak_aktif = max(0, (now - terakhir).days)
@@ -90,6 +110,7 @@ def alokasi_to_out(a: AlokasiSewa, now) -> AlokasiOut:
         status_alokasi=a.status_alokasi, waktu_alokasi=a.waktu_alokasi,
         batas_konfirmasi=a.batas_konfirmasi, sisa_detik_konfirmasi=sisa,
         terakhir_aktif=a.terakhir_aktif, hari_tidak_aktif=hari_tidak_aktif, peringatan=peringatan,
+        terakhir_absen=a.terakhir_absen, sudah_absen_hari_ini=sudah_absen,
         sewa_mulai=a.sewa_mulai, sewa_berakhir=a.sewa_berakhir, sisa_hari_sewa=sisa_sewa,
         waktu_selesai=a.waktu_selesai,
     )

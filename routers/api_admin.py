@@ -13,7 +13,7 @@ import seed
 from algoritma import jam
 from algoritma.deadlock_cron import jalankan_semua
 from algoritma.mlq_scoring import nilai_queue
-from algoritma.penjadwal import jalankan_alokasi, posisi_dalam_queue
+from algoritma.penjadwal import alokasi_otomatis, posisi_dalam_queue
 from database import config
 from database.config import get_db
 from database.models import (Admin, AlokasiSewa, ArsipPelanggaran, LogAktivitas,
@@ -207,7 +207,7 @@ def putuskan_verifikasi(umkm_id: int, data: VerifikasiIn, db: Session = Depends(
     u.waktu_verifikasi = now
     catat(db, "Verifikasi", teks, umkm_id=u.id, waktu=now)
     db.commit()
-    jalankan_alokasi(db)
+    alokasi_otomatis(db)
     db.refresh(u)
     return _umkm_admin(u)
 

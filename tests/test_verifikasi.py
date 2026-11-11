@@ -34,7 +34,9 @@ def test_aksi_penjual_wajib_pin_benar(client):
     tambah_zona(client, "A", 2)
     u = daftar(client)
     assert client.post(f"/alokasi/{kode(u)}/konfirmasi", json={"pin": "000000"}).status_code == 403
-    assert client.post(f"/alokasi/{kode(u)}/konfirmasi", json={}).status_code == 422
+    client.post("/penjual/keluar")                       # tanpa sesi dan tanpa PIN -> ditolak
+    assert client.post(f"/alokasi/{kode(u)}/konfirmasi", json={}).status_code == 401
+    assert client.post(f"/alokasi/{kode(u)}/konfirmasi", json={"pin": "12"}).status_code == 422
     assert client.post(f"/alokasi/{kode(u)}/konfirmasi", json=PIN_JSON).status_code == 200
 
 
@@ -174,3 +176,117 @@ def test_api_admin_baru_wajib_login(client):
         assert client.get(jalur).status_code == 401
     assert client.post("/api/admin/umkm/1/reset-pin").status_code == 401
     assert client.get("/admin/verifikasi", follow_redirects=False).status_code == 303
+
+
+# ---------- Privasi antar-penjual & absen harian ----------
+def test_penjual_tidak_bisa_membuka_status_penjual_lain(client):
+    a = daftar(client, nama_usaha="Penjual A")
+    b = daftar(client, nama_usaha="Penjual B")          # browser kini masuk sebagai B
+    assert client.get(f"/pendaftaran/{kode(a)}/status").status_code == 401
+    assert client.get(f"/pendaftaran/{kode(b)}/status").status_code == 200
+    assert client.get("/penjual/saya").json()["umkm"]["kode_pendaftaran"] == kode(b)
+    # kode orang lain tanpa PIN yang benar tetap tertutup
+    assert client.post("/penjual/masuk", json={"kode": kode(a), "pin": "000000"}).status_code == 403
+    client.post("/penjual/keluar")
+    assert client.get("/penjual/saya").status_code == 401
+    assert client.get(f"/pendaftaran/{kode(b)}/status").status_code == 401
+
+
+def test_sesi_admin_tidak_berlaku_sebagai_sesi_penjual(client):
+    u = daftar(client)
+    client.post("/penjual/keluar")
+    assert client.get(f"/pendaftaran/{kode(u)}/status").status_code == 401   # admin masih login
+
+
+def test_aksi_tanpa_pin_butuh_sesi_pemilik(client):
+    tambah_zona(client, "A", 4)
+    a = daftar(client, nama_usaha="A")
+    b = daftar(client, nama_usaha="B")                   # sesi milik B
+    assert client.post(f"/alokasi/{kode(a)}/konfirmasi").status_code == 401
+    assert client.post(f"/alokasi/{kode(b)}/konfirmasi").status_code == 200
+
+
+def test_absen_harian_tercatat(client):
+    tambah_zona(client, "A", 2)
+    u = daftar(client)
+    client.post(f"/alokasi/{kode(u)}/konfirmasi", json=PIN_JSON)
+    awal = status(client, u)["alokasi"]
+    assert awal["sudah_absen_hari_ini"] is False and awal["terakhir_absen"] is None   # konfirmasi bukan absen
+    r = client.post(f"/alokasi/{kode(u)}/absen").json()                             # pakai sesi
+    assert r["sudah_absen_hari_ini"] is True and r["terakhir_absen"]
+    # keesokan harinya kembali "belum"
+    client.post("/api/admin/jam/majukan", json={"hari": 1})
+    assert status(client, u)["alokasi"]["sudah_absen_hari_ini"] is False
+
+
+# ---------- Putaran alokasi MLQ (mode manual) ----------
+@pytest.fixture()
+def manual(monkeypatch):
+    monkeypatch.setattr(config, "PUTARAN_ALOKASI", "manual")
+
+
+def test_putaran_mendahulukan_queue1_walau_q3_siap_lebih_dulu(client, manual):
+    tambah_zona(client, "A", 4)
+    q3 = daftar(client, nama_usaha="Reseller Cepat", sumber_produk="reseller", kebutuhan_muka=3)
+    q2 = daftar(client, nama_usaha="Kuliner", jenis_usaha="kuliner", kebutuhan_muka=2)
+    q1 = daftar(client, nama_usaha="Pengrajin", kebutuhan_muka=2)
+    # mode manual: belum ada yang langsung mendapat lapak
+    assert all(u["alokasi"] is None for u in (q3, q2, q1))
+
+    pra = client.get("/antrean/putaran").json()
+    assert [r["nama_usaha"] for r in pra["rencana"]] == ["Pengrajin", "Kuliner", "Reseller Cepat"]
+    assert [r["dapat"] for r in pra["rencana"]] == [True, True, False]   # 4 m: 2 + 2, Q3 tidak muat
+
+    hasil = client.post("/antrean/putaran").json()
+    assert hasil["dialokasikan"] == 2 and hasil["jumlah_menunggu"] == 1
+    assert status(client, q1)["alokasi"]["mulai"] == 0
+    assert status(client, q3)["umkm"]["status_pendaftaran"] == "Menunggu"
+
+
+def test_putaran_wajib_admin(client):
+    client.post("/admin/logout")
+    assert client.get("/antrean/putaran").status_code == 401
+    assert client.post("/antrean/putaran").status_code == 401
+
+
+# ---------- Logika lanjutan ----------
+def test_pernah_dicabut_turun_satu_tingkat_saat_daftar_ulang(client, db):
+    from datetime import timedelta
+
+    from algoritma.deadlock_cron import jalankan_semua
+    from database.config import utcnow
+    from database.models import AlokasiSewa
+
+    tambah_zona(client, "A", 2)
+    u = daftar(client, nik="5555000000000001")
+    client.post(f"/alokasi/{kode(u)}/konfirmasi", json=PIN_JSON)
+    row = db.get(AlokasiSewa, u["alokasi"]["id"])
+    row.terakhir_aktif = utcnow() - timedelta(days=15)
+    db.commit()
+    assert jalankan_semua(db)["preemption"] == [u["umkm"]["id"]]
+
+    ulang = daftar(client, nik="5555000000000001")          # kriya lokal = Q1, tapi pernah dicabut
+    assert ulang["umkm"]["queue_level"] == 2 and ulang["umkm"]["queue_awal"] == 2
+    assert any("Rekam jejak" in a for a in ulang["umkm"]["alasan_queue"])
+    # NIK lain tanpa riwayat tetap Q1
+    assert daftar(client, nik="5555000000000002")["umkm"]["queue_level"] == 1
+
+
+def test_putaran_harian_otomatis_sekali_sehari(client, db, manual, monkeypatch):
+    from datetime import datetime
+
+    from algoritma.deadlock_cron import jalankan_semua
+
+    monkeypatch.setattr(config, "PUTARAN_HARIAN_JAM", 7)
+    tambah_zona(client, "A", 4)
+    u = daftar(client)
+    pagi = datetime(2026, 11, 12, 1, 0)            # 08.00 WIB
+    assert jalankan_semua(db, now=pagi)["putaran_harian"] == 1
+    db.expire_all()
+    assert status(client, u)["alokasi"]["kode_lapak"] == "A-01"
+    daftar(client, nama_usaha="Kedua")
+    assert jalankan_semua(db, now=pagi.replace(hour=5))["putaran_harian"] == 0   # hari yang sama
+    subuh = datetime(2026, 11, 12, 22, 0)          # 05.00 WIB besoknya, belum jam 7
+    assert jalankan_semua(db, now=subuh)["putaran_harian"] == 0
+    besok = datetime(2026, 11, 13, 0, 30)          # 07.30 WIB
+    assert jalankan_semua(db, now=besok)["putaran_harian"] == 1

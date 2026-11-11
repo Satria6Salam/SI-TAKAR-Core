@@ -2,6 +2,17 @@
   const form = document.getElementById("admin-login-form");
   const error = document.getElementById("login-error");
   const submit = form.querySelector("button[type='submit']");
+  const peek = document.getElementById("peek");
+  const password = form.elements.password;
+
+  peek?.addEventListener("click", () => {
+    const tampil = password.type === "password";
+    password.type = tampil ? "text" : "password";
+    peek.textContent = tampil ? "Sembunyikan" : "Lihat";
+    peek.setAttribute("aria-pressed", String(tampil));
+    password.focus();
+  });
+  if (form.elements.username.value) password.focus();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();

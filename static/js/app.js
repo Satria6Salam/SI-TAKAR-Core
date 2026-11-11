@@ -47,6 +47,10 @@
     }
     return body;
   }
+  const ambilStatus = (kode, pin) =>
+    pin
+      ? postJson("/penjual/masuk", { kode, pin })
+      : api(kode ? `/pendaftaran/${encodeURIComponent(kode)}/status` : "/penjual/saya");
   const postJson = (path, data) =>
     api(path, {
       method: "POST",
@@ -109,13 +113,55 @@
       .join("");
   }
 
+  // ---------- animasi: angka menghitung naik & elemen muncul saat digulir ----------
+  const kurangiGerak = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function hitungNaik(el, nilai, akhiran = "") {
+    if (!el) return;
+    const tujuan = Number(nilai) || 0;
+    const awal = Number(el.dataset.nilai || 0);
+    el.dataset.nilai = tujuan;
+    if (kurangiGerak || awal === tujuan) {
+      el.textContent = tujuan.toLocaleString("id-ID") + akhiran;
+      return;
+    }
+    const mulai = performance.now();
+    const langkah = (t) => {
+      const p = Math.min(1, (t - mulai) / 900);
+      const v = awal + (tujuan - awal) * (1 - Math.pow(1 - p, 3));
+      el.textContent = (Number.isInteger(tujuan) ? Math.round(v) : v.toFixed(1)).toLocaleString("id-ID") + akhiran;
+      if (p < 1) requestAnimationFrame(langkah);
+    };
+    requestAnimationFrame(langkah);
+  }
+  const pengamat = "IntersectionObserver" in window && !kurangiGerak
+    ? new IntersectionObserver((entri) => entri.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("tampil");
+          pengamat.unobserve(e.target);
+        }
+      }), { threshold: 0.12 })
+    : null;
+  if (pengamat) {
+    document.querySelectorAll(
+      ".section-head, .process-card, .ribbon, .queue-card, .split > *, .map-card, .cta-band .inner, .form-card, .side-card, .status-search, .status-result, .business-banner, .info-panel",
+    ).forEach((el, i) => {
+      el.classList.add("reveal");
+      el.style.transitionDelay = `${(i % 4) * 80}ms`;
+      pengamat.observe(el);
+    });
+  }
+
   // ---------- beranda ----------
   async function loadBeranda() {
     try {
       const peta = await api("/peta");
       const r = peta.ringkasan;
-      byId("avail-empty").textContent = Number(r.kosong_m).toLocaleString("id-ID");
-      byId("avail-total").textContent = Number(r.total_m).toLocaleString("id-ID");
+      hitungNaik(byId("avail-empty"), r.kosong_m);
+      hitungNaik(byId("avail-total"), r.total_m);
+      hitungNaik(byId("hero-empty"), r.kosong_m, " m");
+      hitungNaik(byId("hero-filled"), r.terisi);
+      hitungNaik(byId("hero-occupancy"), r.keterisian_persen, "%");
+      hitungNaik(byId("ribbon-empty"), r.kosong_m);
       byId("avail-updated").textContent =
         `${r.terisi} lapak terisi · ${r.dipesan} menunggu konfirmasi · keterisian ${r.keterisian_persen}%`;
       byId("zone-list").innerHTML = peta.zona
@@ -342,7 +388,7 @@
               ${u.status_khusus ? `<option value="khusus" ${u.punya_ktp ? "selected" : ""}>Bukti status khusus</option>` : ""}
             </select>
             <input type="file" name="berkas" required accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" />
-            <input type="password" name="pin" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN" autocomplete="current-password" />
+            <input type="password" name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN" autocomplete="current-password" />
             <button class="btn btn-green" type="submit">Unggah</button>
           </div>
           <p class="form-note" id="upload-msg"></p>
@@ -358,7 +404,7 @@
           ? ` Anda sudah ${u.jumlah_timeout} kali melewati batas konfirmasi; setelah ${info.maks_timeout} kali pendaftaran gugur.`
           : "";
         return `<div class="notice notice-blue"><b>Anda berada di urutan ke-${data.posisi_dalam_queue} dari ${data.jumlah_di_queue} di Queue ${u.queue_level}.</b>
-          Lapak dipotong otomatis ketika giliran Anda tiba dan ada ruang bersambung minimal ${meter(u.kebutuhan_muka)}.${ulang}</div>`;
+          Lapak dibagikan pada putaran alokasi berikutnya: Queue 1 dilayani lebih dulu, lalu Queue 2, lalu Queue 3, selama ada ruang bersambung minimal ${meter(u.kebutuhan_muka)}.${ulang}</div>`;
       }
       if (st === "Menunggu Konfirmasi" && a) {
         return `<div class="offer-box">
@@ -367,7 +413,7 @@
             <p>Zona ${escapeHtml(a.zona)} · meter ke-${a.mulai} sampai ${a.mulai + a.panjang} · ${a.panjang} × ${a.lebar} m (${a.luas} m²)</p></div>
           <div class="offer-timer"><small>Sisa waktu konfirmasi</small>
             <b id="countdown">${hitungMundur(a.sisa_detik_konfirmasi)}</b>
-            <input id="confirm-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="Masukkan PIN" autocomplete="current-password" aria-label="PIN" />
+            <input id="confirm-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN (bila diminta)" autocomplete="current-password" aria-label="PIN" />
             <button class="btn btn-coral" id="confirm-button" type="button">Konfirmasi lapak ini</button>
             <small class="confirm-msg" id="confirm-msg" role="alert"></small></div>
         </div>
@@ -415,7 +461,7 @@
       result.innerHTML = `
         <div class="status-top"><div><span class="kicker">KODE PENDAFTARAN</span><h2>${escapeHtml(u.kode_pendaftaran)}</h2>
           <p>${escapeHtml(u.nama_usaha)} · ${escapeHtml(u.nama_pemilik)} · didaftarkan ${fmtDate(u.waktu_daftar)}</p></div>
-          <span class="pill ${STATUS_PILL[u.status_pendaftaran] || "pill-grey"}">${escapeHtml(u.status_pendaftaran)}</span></div>
+          <div class="status-top-actions"><span class="pill ${STATUS_PILL[u.status_pendaftaran] || "pill-grey"}">${escapeHtml(u.status_pendaftaran)}</span><button class="btn btn-light" id="status-logout" type="button">Keluar</button></div></div>
         <div class="status-detail-grid">
           <div class="status-detail"><small>Jalur antrean</small><b><span class="queue-chip q${u.queue_level}">Queue ${u.queue_level}</span> ${QUEUE_NAMA[u.queue_level]}</b></div>
           <div class="status-detail"><small>Posisi di queue</small><b>${data.posisi_dalam_queue ? `ke-${data.posisi_dalam_queue} dari ${data.jumlah_di_queue}` : u.status_pendaftaran === "Menunggu Verifikasi" ? "Masuk setelah diverifikasi" : "Sudah tidak mengantre"}</b></div>
@@ -442,19 +488,18 @@
       }
       byId("confirm-button")?.addEventListener("click", async (event) => {
         const pin = byId("confirm-pin").value.trim();
-        if (!/^\d{6}$/.test(pin)) {
-          byId("confirm-msg").textContent = "Masukkan PIN 6 angka yang Anda buat saat mendaftar.";
-          byId("confirm-pin").focus();
-          return;
-        }
         event.target.disabled = true;
         try {
-          await postJson(`/alokasi/${encodeURIComponent(u.kode_pendaftaran)}/konfirmasi`, { pin });
+          await postJson(`/alokasi/${encodeURIComponent(u.kode_pendaftaran)}/konfirmasi`, pin ? { pin } : {});
           await load(current, true);
         } catch (error) {
           event.target.disabled = false;
           byId("confirm-msg").textContent = error.message;
         }
+      });
+      byId("status-logout").addEventListener("click", async () => {
+        await postJson("/penjual/keluar").catch(() => {});
+        mintaPin("Anda sudah keluar", "Masukkan kode pendaftaran dan PIN untuk melihat status lagi.");
       });
       byId("upload-form")?.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -467,7 +512,7 @@
         tombol.disabled = true;
         msg.textContent = "Mengunggah…";
         try {
-          await unggahBerkas(u.kode_pendaftaran, f.elements.pin.value, f.elements.jenis.value, file);
+          await unggahBerkas(u.kode_pendaftaran, f.elements.pin.value || null, f.elements.jenis.value, file);
           await load(current, true);
         } catch (error) {
           msg.textContent = error.message;
@@ -477,11 +522,14 @@
     }
 
     async function load(kode, diam = false) {
-      current = kode.trim().toUpperCase();
-      if (!current) return;
+      const target = kode.trim().toUpperCase();
+      if (!target) return;
       try {
         await infoReady;
-        const data = await api(`/pendaftaran/${encodeURIComponent(current)}/status`);
+        const pinEl = byId("status-pin");
+        const data = await ambilStatus(target, diam ? "" : pinEl.value.trim());
+        pinEl.value = "";
+        current = target;            // pembaruan otomatis hanya setelah berhasil masuk
         setKode(current);
         render(data);
       } catch (error) {
@@ -490,21 +538,33 @@
         byId("process-card").hidden = true;
         byId("history-card").hidden = true;
         result.innerHTML = `<div class="empty-state"><span class="empty-icon">⌕</span>
-          <h2>${error.status === 404 ? "Kode pendaftaran tidak ditemukan" : "Status tidak dapat dimuat"}</h2>
-          <p>${escapeHtml(error.status === 404 ? "Periksa kembali kode Anda, atau lakukan pendaftaran terlebih dahulu." : error.message)}</p>
+          <h2>${error.status === 401 ? "Masukkan PIN Anda" : error.status === 404 ? "Kode pendaftaran tidak ditemukan" : error.status === 403 ? "PIN salah" : "Status tidak dapat dimuat"}</h2>
+          <p>${escapeHtml(error.status === 401 ? "Demi privasi, status hanya bisa dibuka pemiliknya dengan kode pendaftaran dan PIN." : error.status === 404 ? "Periksa kembali kode Anda, atau lakukan pendaftaran terlebih dahulu." : error.message)}</p>
           <a class="btn btn-outline" href="/pendaftaran">Daftar UMKM</a></div>`;
       }
     }
 
+    // Seperti Lapak Saya, status selalu meminta PIN setiap kali halaman dibuka.
+    const mintaPin = (judul, teks) => {
+      window.clearInterval(timer);
+      current = "";
+      byId("process-card").hidden = true;
+      byId("history-card").hidden = true;
+      result.innerHTML = `<div class="empty-state"><span class="empty-icon">🔒</span>
+        <h2>${judul}</h2><p>${teks}</p>
+        <a class="text-link" href="/lupa-kode">Lupa kode pendaftaran?</a></div>`;
+    };
     byId("status-search-form").addEventListener("submit", (event) => {
       event.preventDefault();
+      if (!input.value.trim() || !/^\d{6}$/.test(byId("status-pin").value.trim())) {
+        mintaPin("Masukkan kode dan PIN", "Isi kode pendaftaran dan PIN 6 angka yang Anda buat saat mendaftar.");
+        byId(input.value.trim() ? "status-pin" : "status-code").focus();
+        return;
+      }
       load(input.value);
     });
-    const awal = new URLSearchParams(window.location.search).get("kode") || getKode();
-    if (awal) {
-      input.value = awal;
-      load(awal);
-    }
+    input.value = new URLSearchParams(window.location.search).get("kode") || getKode();
+    mintaPin("Masuk untuk melihat status", "Demi privasi, status pendaftaran hanya terbuka setelah Anda memasukkan kode pendaftaran dan PIN.");
     poll = window.setInterval(() => current && load(current, true), 20000);
     window.addEventListener("pagehide", () => {
       window.clearInterval(poll);
@@ -558,6 +618,15 @@
       byId("p-lapak-detail").textContent =
         `Zona ${a.zona} · meter ke-${a.mulai} sampai ${a.mulai + a.panjang} · ${a.panjang} × ${a.lebar} m`;
       const hari = a.hari_tidak_aktif;
+      const sudah = a.sudah_absen_hari_ini;
+      button.className = `btn absen-btn ${sudah ? "sudah" : "belum"}`;
+      button.disabled = sudah;
+      button.textContent = sudah ? "✓ Kios sudah tercatat buka hari ini" : "☀ Buka kios hari ini";
+      const st = byId("absen-status");
+      st.className = `absen-status ${sudah ? "sudah" : "belum"}`;
+      st.innerHTML = sudah
+        ? `<i></i> Sudah absen hari ini, pukul ${new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" }).format(parseTime(a.terakhir_absen))}`
+        : "<i></i> Belum absen hari ini";
       byId("p-terakhir").textContent =
         `Terakhir buka: ${fmtDate(a.terakhir_aktif, true)}${hari ? ` (${hari} hari lalu)` : ""}`;
       const batas = info.preemption_hari || 14;
@@ -572,53 +641,57 @@
 
     async function load(k) {
       kode = k.trim().toUpperCase();
-      if (!kode) {
-        showEmpty("Masukkan kode pendaftaran", "Halaman ini menampilkan lapak milik satu pendaftaran.");
-        return;
-      }
       try {
         await infoReady;
-        const data = await api(`/pendaftaran/${encodeURIComponent(kode)}/status`);
+        const pinEl = byId("profile-pin");
+        const data = await ambilStatus(kode, pinEl.value.trim());
+        pinEl.value = "";
+        kode = data.umkm.kode_pendaftaran;
         setKode(kode);
         render(data);
       } catch (error) {
         showEmpty(
-          error.status === 404 ? "Kode pendaftaran tidak ditemukan" : "Data tidak dapat dimuat",
-          escapeHtml(error.status === 404 ? "Periksa kembali kode Anda." : error.message),
+          error.status === 401 ? "Masuk dengan kode dan PIN" : error.status === 404 ? "Kode pendaftaran tidak ditemukan" : error.status === 403 ? "PIN salah" : "Data tidak dapat dimuat",
+          escapeHtml(error.status === 401 ? "Lapak Saya hanya bisa dibuka pemiliknya. Masukkan kode pendaftaran dan PIN Anda." : error.status === 404 ? "Periksa kembali kode Anda." : error.message),
         );
       }
     }
 
+    // Lapak Saya selalu meminta PIN setiap kali dibuka, walaupun browser masih punya sesi.
     byId("profile-code-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      load(byId("profile-code").value);
-    });
-    const pinInput = byId("activity-pin");
-    try {
-      pinInput.value = sessionStorage.getItem("si-takar-pin") || "";
-    } catch { /* tidak tersedia */ }
-    button.addEventListener("click", async () => {
-      const pin = pinInput.value.trim();
-      if (!/^\d{6}$/.test(pin)) {
-        message.textContent = "Masukkan PIN 6 angka Anda terlebih dahulu.";
-        pinInput.focus();
+      const kodeIsi = byId("profile-code").value.trim();
+      const pin = byId("profile-pin").value.trim();
+      if (!kodeIsi || !/^\d{6}$/.test(pin)) {
+        showEmpty("Masukkan kode dan PIN", "Isi kode pendaftaran dan PIN 6 angka yang Anda buat saat mendaftar.");
+        byId(kodeIsi ? "profile-pin" : "profile-code").focus();
         return;
       }
+      load(kodeIsi);
+    });
+    byId("profile-logout").addEventListener("click", async () => {
+      await postJson("/penjual/keluar").catch(() => {});
+      showEmpty("Anda sudah keluar", "Masukkan kode pendaftaran dan PIN untuk membuka Lapak Saya lagi.");
+      byId("profile-code").value = kode;
+      byId("profile-pin").focus();
+    });
+    button.addEventListener("click", async () => {
       button.disabled = true;
       try {
-        await postJson(`/alokasi/${encodeURIComponent(kode)}/absen`, { pin });
-        try {
-          sessionStorage.setItem("si-takar-pin", pin);   // hanya selama tab ini terbuka
-        } catch { /* tidak tersedia */ }
+        await postJson(`/alokasi/${encodeURIComponent(kode)}/absen`, {});
         message.textContent = "Kios buka tercatat. Hitungan hari tidak aktif kembali ke nol.";
         await load(kode);
       } catch (error) {
         message.textContent = error.message;
-      } finally {
         button.disabled = false;
       }
     });
-    load(new URLSearchParams(window.location.search).get("kode") || getKode());
+    byId("profile-code").value = new URLSearchParams(window.location.search).get("kode") || getKode();
+    showEmpty(
+      "Masuk ke Lapak Saya",
+      "Demi keamanan, Lapak Saya hanya terbuka setelah Anda memasukkan kode pendaftaran dan PIN.",
+    );
+    byId(byId("profile-code").value ? "profile-pin" : "profile-code").focus();
   }
 
   if (page === "beranda") {

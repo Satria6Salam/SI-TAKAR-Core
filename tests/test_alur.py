@@ -32,8 +32,11 @@ def tambah_zona(c, kode, panjang, kedalaman=3):
     assert r.status_code == 201, r.text
 
 
-def status(c, hasil):
-    return c.get(f"/pendaftaran/{hasil['umkm']['kode_pendaftaran']}/status").json()
+def status(c, hasil, pin=PIN):
+    """Masuk sebagai pemilik (kode + PIN), lalu baca statusnya."""
+    k = hasil["umkm"]["kode_pendaftaran"]
+    assert c.post("/penjual/masuk", json={"kode": k, "pin": pin}).status_code == 200
+    return c.get(f"/pendaftaran/{k}/status").json()
 
 
 def kode(hasil):
@@ -320,7 +323,8 @@ def test_data_contoh_mengisi_pasar_sesuai_prioritas(client):
 def test_validasi_dan_404(client):
     assert client.post("/pendaftaran", json={"nama_pemilik": ""}).status_code == 422
     assert client.post("/pendaftaran", json=pendaftar(nik="123")).status_code == 422
-    assert client.get("/pendaftaran/STK-TIDAKADA/status").status_code == 404
+    assert client.get("/pendaftaran/STK-TIDAKADA/status").status_code == 401
+    assert client.post("/penjual/masuk", json={"kode": "STK-TIDAKADA", "pin": PIN}).status_code == 404
     assert client.get("/antrean").json() == {"queue_1": [], "queue_2": [], "queue_3": []}
     assert client.get("/info").json()["timeout_hari"] == 3
 
