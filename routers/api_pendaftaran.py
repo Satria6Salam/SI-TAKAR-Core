@@ -9,6 +9,7 @@ from routers.auth import get_current_admin
 from routers.helpers import alokasi_to_out
 from schemas import StatusAntreanOut, UMKMCreate, UMKMOut, VerifikasiOut
 
+
 router = APIRouter(tags=["Pendaftaran & Antrean"])
 
 
@@ -47,6 +48,8 @@ def status_antrean(umkm_id: int, db: Session = Depends(get_db)):
 
 @router.get("/antrean")
 def daftar_antrean(db: Session = Depends(get_db), _: Admin = Depends(get_current_admin)):
+
+
     """Manajemen Antrean MLQ (admin): pendaftar yang mengantre per Queue."""
     hasil = {"queue_1": [], "queue_2": [], "queue_3": []}
     for u in antrean_menunggu(db).all():

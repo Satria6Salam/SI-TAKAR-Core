@@ -7,6 +7,7 @@ from database.models import (Admin, AlokasiSewa, ArsipPelanggaran, StatusAlokasi
                              StatusPendaftaran)
 from routers.auth import get_current_admin
 from routers.helpers import alokasi_to_out
+from routers.admin_security import require_admin
 from schemas import AlokasiOut, LogDeadlockOut
 
 router = APIRouter(prefix="/alokasi", tags=["Alokasi & Deadlock"])
@@ -63,6 +64,7 @@ def alokasi_milik_umkm(umkm_id: int, db: Session = Depends(get_db)):
 
 @router.get("/log", response_model=list[LogDeadlockOut])
 def log_deadlock(db: Session = Depends(get_db), _: Admin = Depends(get_current_admin)):
+
     """Monitor Log Deadlock (admin): riwayat Timeout & Preemption, terbaru dulu."""
     rows = db.query(ArsipPelanggaran).order_by(ArsipPelanggaran.id.desc()).all()
     return [LogDeadlockOut(
@@ -73,5 +75,6 @@ def log_deadlock(db: Session = Depends(get_db), _: Admin = Depends(get_current_a
 
 @router.post("/jalankan-deadlock")
 def jalankan_deadlock_manual(db: Session = Depends(get_db), _: Admin = Depends(get_current_admin)):
+
     """Picu satu siklus cek Timeout + Preemption secara manual (untuk demo/admin)."""
     return jalankan_semua(db)

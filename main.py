@@ -9,8 +9,10 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from algoritma.deadlock_cron import jalankan_semua
+
 from database import models  # Penting: supaya semua model ke-load sebelum create_all
 from database.config import CRON_INTERVAL_DETIK, SessionLocal, Base, engine, migrate_schema
+
 from routers import api_admin, api_alokasi, api_pendaftaran, api_peta
 
 # Konfigurasi Direktori Frontend & Templates
